@@ -45,6 +45,39 @@
   --radius-sm: 6px;
 }
 
+:root[data-theme="dark"] {
+  --bg: #1c1b1f;
+  --bg-elevated: #232227;
+  --bg-sunken: #141316;
+  --bg-row-alt: #201f24;
+  --border: #37363d;
+  --border-soft: #2b2a30;
+  --text: #f0eee8;
+  --text-muted: #9b968c;
+
+  --accent: #7396ff;
+  --accent-hover: #8ba7ff;
+  --accent-contrast: #10131c;
+
+  --critical: #f0908f;
+  --critical-bg: #3c2222;
+  --high: #edac6f;
+  --high-bg: #3c2f1a;
+  --medium: #e3c56d;
+  --medium-bg: #39311a;
+  --low: #bdb8ac;
+  --low-bg: #2d2c29;
+
+  --pastel-purple-bg: #34294f;
+  --pastel-purple-text: #c9b8f5;
+  --pastel-mint-bg: #1f3a2d;
+  --pastel-mint-text: #92e2b0;
+  --pastel-butter-bg: #3b3119;
+  --pastel-butter-text: #f2dc8e;
+  --pastel-peach-bg: #3c2a1d;
+  --pastel-peach-text: #f4bd92;
+}
+
 * { box-sizing: border-box; }
 
 html, body {
@@ -157,6 +190,9 @@ h1, h2, h3, .stat-value, .brand-name {
 
 .theme-toggle .icon-moon { display: none; }
 .theme-toggle .icon-sun { display: block; }
+
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+:root[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
 
 /* main content */
 

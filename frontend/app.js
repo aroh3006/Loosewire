@@ -294,4 +294,32 @@
     return '<div class="stat-tile"><div class="stat-label">' + label +
       '</div><div class="stat-value">' + value + "</div></div>";
   }
+
+  const themeToggle = document.getElementById("theme-toggle");
+  const themeToggleLabel = document.getElementById("theme-toggle-label");
+
+  function currentTheme() {
+    return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+  }
+
+  function applyThemeLabel() {
+    themeToggleLabel.textContent = currentTheme() === "dark" ? "Light mode" : "Dark mode";
+  }
+
+  function setTheme(theme) {
+    if (theme === "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+    }
+    document.cookie = "theme=" + theme + "; path=/; max-age=31536000; samesite=lax";
+    applyThemeLabel();
+    if (metricsLoaded) {
+      metricsLoaded = false;
+      loadMetrics();
+    }
+  }
+
+  themeToggle.addEventListener("click", () => setTheme(currentTheme() === "dark" ? "light" : "dark"));
+  applyThemeLabel();
 })();
