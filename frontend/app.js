@@ -91,7 +91,7 @@
     for (const f of report.findings) {
       const tr = document.createElement("tr");
       tr.innerHTML =
-        '<td><span class="tag ' + f.severity + '">' + f.severity + "</span></td>" +
+        '<td><span class="tag ' + f.severity + '">' + severityIcon(f.severity) + f.severity + "</span></td>" +
         '<td><span class="confidence">' + f.confidence + "</span></td>" +
         "<td>" + f.rule.replace(/_/g, " ") + "</td>" +
         '<td class="location">' + escapeHtml(f.file) + ":" + f.line + "</td>" +
@@ -99,6 +99,17 @@
         '<td class="fix">' + escapeHtml(f.fix) + "</td>";
       findingsBody.appendChild(tr);
     }
+  }
+
+  const SEVERITY_ICONS = {
+    critical: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    high: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    medium: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+    low: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+  };
+
+  function severityIcon(severity) {
+    return SEVERITY_ICONS[severity] || "";
   }
 
   function escapeHtml(s) {
