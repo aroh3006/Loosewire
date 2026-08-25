@@ -41,10 +41,18 @@ def _prf(tp: int, fp: int, fn: int) -> dict:
 def compute_metrics() -> dict:
     manifest = _load_manifest()
 
-    scan_results: dict[str, set[str]] = {}
+    findings_by_fixture: dict[str, list] = {}
+    severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
     for entry in manifest:
         report = scan_directory(os.path.join(HELDOUT_ROOT, entry["dir"]))
-        scan_results[entry["dir"]] = {f.rule for f in report.findings}
+        findings_by_fixture[entry["dir"]] = report.findings
+        for finding in report.findings:
+            if finding.severity in severity_counts:
+                severity_counts[finding.severity] += 1
+
+    scan_results = {
+        path: {f.rule for f in findings} for path, findings in findings_by_fixture.items()
+    }
 
     per_rule = {}
     for rule_name in ALL_RULE_NAMES:
@@ -70,6 +78,7 @@ def compute_metrics() -> dict:
         "fixture_count": len(manifest),
         "per_rule": [{"rule": name, **per_rule[name]} for name in ALL_RULE_NAMES],
         "overall": overall,
+        "findings_by_severity": severity_counts,
         "cost": {
             "false_positive_cost_usd": FALSE_POSITIVE_COST_USD,
             "false_negative_cost_usd": FALSE_NEGATIVE_COST_USD,

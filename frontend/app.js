@@ -142,9 +142,117 @@
     return (x * 100).toFixed(1) + "%";
   }
 
+  function cssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function donutChartHtml(bySeverity) {
+    const order = ["critical", "high", "medium", "low"];
+    const colors = { critical: cssVar("--critical"), high: cssVar("--high"), medium: cssVar("--medium"), low: cssVar("--low") };
+    const values = order.map((k) => bySeverity[k] || 0);
+    const total = values.reduce((a, b) => a + b, 0);
+
+    const r = 52, cx = 64, cy = 64, sw = 16;
+    const circumference = 2 * Math.PI * r;
+    let offset = 0;
+    let circles = "";
+
+    if (total === 0) {
+      circles = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' +
+        cssVar("--border") + '" stroke-width="' + sw + '"/>';
+    } else {
+      for (const key of order) {
+        const v = bySeverity[key] || 0;
+        if (v === 0) continue;
+        const frac = v / total;
+        const len = frac * circumference;
+        circles += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + colors[key] +
+          '" stroke-width="' + sw + '" stroke-dasharray="' + len + ' ' + circumference +
+          '" stroke-dashoffset="' + (-offset) + '" transform="rotate(-90 ' + cx + ' ' + cy + ')">' +
+          "<title>" + key + ": " + v + " (" + (frac * 100).toFixed(0) + "%)</title></circle>";
+        offset += len;
+      }
+    }
+
+    const svg = '<svg viewBox="0 0 128 128" width="128" height="128">' + circles +
+      '<text x="' + cx + '" y="' + (cy - 4) + '" text-anchor="middle" class="donut-total-label" fill="' + cssVar("--text") + '">' + total + '</text>' +
+      '<text x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle" class="donut-total-sub" fill="' + cssVar("--text-muted") + '">FINDINGS</text>' +
+      '</svg>';
+
+    let legend = '<ul class="legend">';
+    for (const key of order) {
+      const v = bySeverity[key] || 0;
+      const pctVal = total ? Math.round((v / total) * 100) : 0;
+      legend += '<li><span class="legend-dot" style="background:' + colors[key] + '"></span>' +
+        '<span class="legend-label">' + key + '</span>' +
+        '<span class="legend-value">' + v + " (" + pctVal + "%)</span></li>";
+    }
+    legend += "</ul>";
+
+    return '<div class="donut-wrap">' + svg + legend + "</div>";
+  }
+
+  function gaugeSvg(value, color) {
+    const r = 34, cx = 40, cy = 40, sw = 8;
+    const circumference = 2 * Math.PI * r;
+    const len = value * circumference;
+    return '<svg viewBox="0 0 80 80" width="80" height="80">' +
+      '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + cssVar("--bg-sunken") + '" stroke-width="' + sw + '"/>' +
+      '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="' + sw +
+      '" stroke-linecap="round" stroke-dasharray="' + len + " " + circumference +
+      '" transform="rotate(-90 ' + cx + " " + cy + ')"/>' +
+      "</svg>";
+  }
+
+  function gaugesRowHtml(o) {
+    const items = [
+      { label: "Precision", value: o.precision, color: cssVar("--accent") },
+      { label: "Recall", value: o.recall, color: cssVar("--pastel-mint-text") },
+      { label: "F1", value: o.f1, color: cssVar("--pastel-purple-text") },
+    ];
+    let html = '<div class="gauges-row">';
+    for (const it of items) {
+      html += '<div class="gauge">' +
+        '<div style="position:relative">' + gaugeSvg(it.value, it.color) +
+        '<div class="gauge-value" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">' +
+        pct(it.value) + "</div></div>" +
+        '<div class="gauge-label">' + it.label + "</div></div>";
+    }
+    html += "</div>";
+    return html;
+  }
+
+  function barsHtml(perRule) {
+    const maxCount = Math.max(1, ...perRule.flatMap((r) => [r.tp, r.fp, r.fn]));
+    let html = '<div class="bar-rows">';
+    for (const r of perRule) {
+      html += '<div><div class="bar-row-label">' + r.rule.replace(/_/g, " ") + '</div><div class="bar-group">';
+      html += barLine("TP", r.tp, maxCount, "tp");
+      html += barLine("FP", r.fp, maxCount, "fp");
+      html += barLine("FN", r.fn, maxCount, "fn");
+      html += "</div></div>";
+    }
+    html += "</div>";
+    return html;
+  }
+
+  function barLine(label, value, maxCount, cls) {
+    const widthPct = Math.max(2, (value / maxCount) * 100);
+    return '<div class="bar-line"><span class="bar-line-tag">' + label + '</span>' +
+      '<span class="bar-track"><span class="bar-fill ' + cls + '" style="width:' + widthPct + '%"></span></span>' +
+      '<span class="bar-line-count">' + value + "</span></div>";
+  }
+
   function renderMetrics(data) {
     const o = data.overall;
     let html = "";
+
+    html += '<div class="charts-row">';
+    html += '<div class="chart-card"><h2>Findings by severity</h2>' + donutChartHtml(data.findings_by_severity || {}) + "</div>";
+    html += '<div class="chart-card"><h2>Precision · recall · F1</h2>' + gaugesRowHtml(o) + "</div>";
+    html += "</div>";
+
+    html += '<div class="chart-card"><h2>Per-rule breakdown</h2>' + barsHtml(data.per_rule) + "</div>";
 
     html += '<div class="metrics-grid">';
     html += statTile("Precision", pct(o.precision));

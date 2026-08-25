@@ -46,6 +46,12 @@
     "recall": 1.0,
     "f1": 0.9411764705882353
   },
+  "findings_by_severity": {
+    "critical": 2,
+    "high": 7,
+    "medium": 2,
+    "low": 0
+  },
   "cost": {
     "false_positive_cost_usd": 25.0,
     "false_negative_cost_usd": 500.0,
