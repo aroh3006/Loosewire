@@ -1,7 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Fraunces:wght@600;700&display=swap');
 
 :root {
   --font: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-wordmark: 'Fraunces', Georgia, 'Times New Roman', serif;
 
   --bg: #ece6da;
   --bg-elevated: #f6f2e9;
@@ -90,7 +91,7 @@ html, body {
   line-height: 1.55;
 }
 
-h1, h2, h3, .stat-value, .brand-name {
+h1, h2, h3, .stat-value {
   font-family: var(--font);
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -119,28 +120,15 @@ h1, h2, h3, .stat-value, .brand-name {
 .sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 10px 24px;
-}
-
-.brand-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: var(--accent);
-  color: var(--accent-contrast);
-  font-weight: 800;
-  font-size: 11px;
-  letter-spacing: 0.02em;
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
+  padding: 8px 10px 28px;
 }
 
 .brand-name {
+  font-family: var(--font-wordmark);
   color: #ffffff;
-  font-size: 15px;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .sidebar-nav {
@@ -202,8 +190,9 @@ h1, h2, h3, .stat-value, .brand-name {
 }
 
 .content {
-  padding: 40px 44px 64px;
-  max-width: 1040px;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 48px 56px 88px;
 }
 
 .view { display: none; }
