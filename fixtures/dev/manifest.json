@@ -1,0 +1,18 @@
+[
+  {"dir": "flask/missing_signature_verification_bug", "framework": "flask", "rule": "missing_signature_verification", "bug": true},
+  {"dir": "flask/missing_signature_verification_clean", "framework": "flask", "rule": "missing_signature_verification", "bug": false},
+  {"dir": "flask/exposed_secret_key_bug", "framework": "flask", "rule": "exposed_secret_key", "bug": true},
+  {"dir": "flask/exposed_secret_key_clean", "framework": "flask", "rule": "exposed_secret_key", "bug": false},
+  {"dir": "flask/missing_webhook_signature_bug", "framework": "flask", "rule": "missing_webhook_signature", "bug": true},
+  {"dir": "flask/missing_webhook_signature_clean", "framework": "flask", "rule": "missing_webhook_signature", "bug": false},
+  {"dir": "flask/missing_amount_validation_bug", "framework": "flask", "rule": "missing_amount_validation", "bug": true},
+  {"dir": "flask/missing_amount_validation_clean", "framework": "flask", "rule": "missing_amount_validation", "bug": false},
+  {"dir": "express/missing_signature_verification_bug", "framework": "express", "rule": "missing_signature_verification", "bug": true},
+  {"dir": "express/missing_signature_verification_clean", "framework": "express", "rule": "missing_signature_verification", "bug": false},
+  {"dir": "express/exposed_secret_key_bug", "framework": "express", "rule": "exposed_secret_key", "bug": true},
+  {"dir": "express/exposed_secret_key_clean", "framework": "express", "rule": "exposed_secret_key", "bug": false},
+  {"dir": "express/missing_webhook_signature_bug", "framework": "express", "rule": "missing_webhook_signature", "bug": true},
+  {"dir": "express/missing_webhook_signature_clean", "framework": "express", "rule": "missing_webhook_signature", "bug": false},
+  {"dir": "express/missing_amount_validation_bug", "framework": "express", "rule": "missing_amount_validation", "bug": true},
+  {"dir": "express/missing_amount_validation_clean", "framework": "express", "rule": "missing_amount_validation", "bug": false}
+]
