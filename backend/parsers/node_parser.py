@@ -116,7 +116,7 @@ def parse(source: SourceFile) -> list[CodeBlock]:
         if brace_pos == -1:
             continue
         if arrow_pos != -1 and arrow_pos < brace_pos:
-            # (req, res) => { ... } — brace_pos already points past the arrow, fine
+            # (req, res) => { ... }, brace_pos already points past the arrow, fine
             pass
         # bail if the next non-whitespace after the match is a bare identifier
         # (handler passed by reference, e.g. app.post('/x', handlerName)) with

@@ -44,10 +44,10 @@
         <div class="rule-summary">
           <h2>What this checks</h2>
           <ul class="rule-list">
-            <li><span class="rule-name">Missing signature verification</span> — order completion code that never checks a signature or HMAC before marking an order paid.</li>
-            <li><span class="rule-name">Exposed secret key</span> — secret-looking values hardcoded into source, especially code that ships to a browser or gets bundled into a mobile app.</li>
-            <li><span class="rule-name">Missing webhook signature check</span> — webhook/callback handlers that trust the payload without verifying a signature header.</li>
-            <li><span class="rule-name">Missing amount validation</span> — order completion logic that never compares the confirmed amount to the amount stored at order creation.</li>
+            <li><span class="rule-name">Missing signature verification</span> : order completion code that never checks a signature or HMAC before marking an order paid.</li>
+            <li><span class="rule-name">Exposed secret key</span> : secret-looking values hardcoded into source, especially code that ships to a browser or gets bundled into a mobile app.</li>
+            <li><span class="rule-name">Missing webhook signature check</span> : webhook/callback handlers that trust the payload without verifying a signature header.</li>
+            <li><span class="rule-name">Missing amount validation</span> : order completion logic that never compares the confirmed amount to the amount stored at order creation.</li>
           </ul>
         </div>
       </div>
