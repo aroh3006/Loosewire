@@ -8,31 +8,55 @@
 </head>
 <body>
 <div class="app-shell">
-  <header class="topbar">
-    <div class="brand">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
       <span class="brand-mark">LW</span>
       <span class="brand-name">Loosewire</span>
     </div>
-    <nav class="tabs" id="nav-tabs">
-      <button class="tab active" data-view="upload">Upload</button>
-      <button class="tab" data-view="findings">Findings</button>
-      <button class="tab" data-view="metrics">Metrics</button>
+
+    <nav class="sidebar-nav" id="nav-tabs">
+      <button class="nav-item active" data-view="upload">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16l-4-4-4 4"/><path d="M12 12v9"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+        <span>Upload</span>
+      </button>
+      <button class="nav-item" data-view="findings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <span>Findings</span>
+      </button>
+      <button class="nav-item" data-view="metrics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Metrics</span>
+      </button>
     </nav>
-  </header>
 
-  <main class="content">
+    <div class="sidebar-bottom">
+      <button class="nav-item theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        <span id="theme-toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
 
-    <section id="view-upload" class="view active">
-      <div class="panel">
-        <h1>Scan checkout integration code</h1>
-        <p class="muted">
-          Upload a zip of your project, or an APK file. The archive is extracted into a
-          temporary directory on the server, scanned, and deleted immediately after the
-          report is generated. Nothing is stored and no external network calls are made.
-        </p>
+  <div class="main">
+    <main class="content">
+
+      <section id="view-upload" class="view active">
+        <div class="view-head">
+          <h1>Scan checkout integration code</h1>
+          <p class="muted">
+            Upload a zip of your project, or an APK file. The archive is extracted into a
+            temporary directory on the server, scanned, and deleted immediately after the
+            report is generated. Nothing is stored and no external network calls are made.
+          </p>
+        </div>
 
         <div class="dropzone" id="dropzone">
           <input type="file" id="file-input" accept=".zip,.apk" hidden>
+          <div class="dropzone-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16l-4-4-4 4"/><path d="M12 12v9"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+          </div>
           <div class="dropzone-inner">
             <p class="dropzone-title">Drop a .zip or .apk here, or click to choose a file</p>
             <p class="dropzone-hint">Max 50 MB</p>
@@ -41,7 +65,7 @@
 
         <div id="upload-status" class="upload-status"></div>
 
-        <div class="rule-summary">
+        <div class="panel rule-summary">
           <h2>What this checks</h2>
           <ul class="rule-list">
             <li><span class="rule-name">Missing signature verification</span> : order completion code that never checks a signature or HMAC before marking an order paid.</li>
@@ -50,19 +74,19 @@
             <li><span class="rule-name">Missing amount validation</span> : order completion logic that never compares the confirmed amount to the amount stored at order creation.</li>
           </ul>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="view-findings" class="view">
-      <div class="panel">
-        <div class="findings-header">
-          <h1>Findings</h1>
-          <div class="findings-meta" id="findings-meta"></div>
+      <section id="view-findings" class="view">
+        <div class="view-head">
+          <div class="findings-header">
+            <h1>Findings</h1>
+            <div class="findings-meta" id="findings-meta"></div>
+          </div>
         </div>
-        <div id="findings-empty" class="empty-state">
+        <div id="findings-empty" class="empty-state panel">
           No scan yet. Upload a project on the Upload tab to see findings here.
         </div>
-        <div id="findings-table-wrap" class="table-wrap" style="display:none">
+        <div id="findings-table-wrap" class="table-wrap panel" style="display:none">
           <table class="findings-table">
             <thead>
               <tr>
@@ -77,22 +101,22 @@
             <tbody id="findings-tbody"></tbody>
           </table>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="view-metrics" class="view">
-      <div class="panel">
-        <h1>Detection accuracy</h1>
-        <p class="muted">
-          Computed by running the scanner against a held-out fixture set that was never
-          used to tune the detection rules. Numbers below reflect real precision and
-          recall, not a curated best case.
-        </p>
+      <section id="view-metrics" class="view">
+        <div class="view-head">
+          <h1>Detection accuracy</h1>
+          <p class="muted">
+            Computed by running the scanner against a held-out fixture set that was never
+            used to tune the detection rules. Numbers below reflect real precision and
+            recall, not a curated best case.
+          </p>
+        </div>
         <div id="metrics-content"></div>
-      </div>
-    </section>
+      </section>
 
-  </main>
+    </main>
+  </div>
 </div>
 <script src="app.js"></script>
 </body>

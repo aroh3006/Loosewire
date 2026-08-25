@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const tabs = document.querySelectorAll(".tab");
+  const tabs = document.querySelectorAll("#nav-tabs .nav-item");
   const views = document.querySelectorAll(".view");
 
   function showView(name) {
