@@ -1,8 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
+
+from evaluation.metrics import compute_metrics
 
 router = APIRouter()
 
 
 @router.get("/api/metrics")
 async def get_metrics():
-    raise HTTPException(status_code=501, detail="metrics not wired up yet")
+    return compute_metrics()

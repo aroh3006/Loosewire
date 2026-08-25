@@ -1,0 +1,21 @@
+[
+  {"dir": "flask/sig_bug", "framework": "fastapi", "rule": "missing_signature_verification", "bug": true},
+  {"dir": "flask/sig_clean", "framework": "fastapi", "rule": "missing_signature_verification", "bug": false},
+  {"dir": "flask/secret_bug", "framework": "fastapi", "rule": "exposed_secret_key", "bug": true},
+  {"dir": "flask/secret_clean", "framework": "fastapi", "rule": "exposed_secret_key", "bug": false},
+  {"dir": "flask/webhook_bug", "framework": "fastapi", "rule": "missing_webhook_signature", "bug": true},
+  {"dir": "flask/webhook_clean", "framework": "fastapi", "rule": "missing_webhook_signature", "bug": false},
+  {"dir": "flask/amount_bug", "framework": "fastapi", "rule": "missing_amount_validation", "bug": true},
+  {"dir": "flask/amount_clean", "framework": "fastapi", "rule": "missing_amount_validation", "bug": false},
+  {"dir": "flask/distractor_catalog", "framework": "fastapi", "rule": null, "bug": false},
+  {"dir": "express/sig_bug", "framework": "express", "rule": "missing_signature_verification", "bug": true},
+  {"dir": "express/sig_clean", "framework": "express", "rule": "missing_signature_verification", "bug": false},
+  {"dir": "express/secret_bug", "framework": "express", "rule": "exposed_secret_key", "bug": true},
+  {"dir": "express/secret_clean", "framework": "express", "rule": "exposed_secret_key", "bug": false},
+  {"dir": "express/webhook_bug", "framework": "express", "rule": "missing_webhook_signature", "bug": true},
+  {"dir": "express/webhook_clean", "framework": "express", "rule": "missing_webhook_signature", "bug": false},
+  {"dir": "express/amount_bug", "framework": "express", "rule": "missing_amount_validation", "bug": true},
+  {"dir": "express/amount_clean", "framework": "express", "rule": "missing_amount_validation", "bug": false},
+  {"dir": "express/distractor_catalog", "framework": "express", "rule": null, "bug": false},
+  {"dir": "express/helper_indirection_clean", "framework": "express", "rule": "missing_signature_verification", "bug": false}
+]

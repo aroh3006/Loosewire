@@ -1,0 +1,54 @@
+{
+  "fixture_count": 19,
+  "per_rule": [
+    {
+      "rule": "missing_signature_verification",
+      "tp": 2,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.6666666666666666,
+      "recall": 1.0,
+      "f1": 0.8
+    },
+    {
+      "rule": "missing_webhook_signature",
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "rule": "missing_amount_validation",
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "rule": "exposed_secret_key",
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  ],
+  "overall": {
+    "tp": 8,
+    "fp": 1,
+    "fn": 0,
+    "precision": 0.8888888888888888,
+    "recall": 1.0,
+    "f1": 0.9411764705882353
+  },
+  "cost": {
+    "false_positive_cost_usd": 25.0,
+    "false_negative_cost_usd": 500.0,
+    "net_savings_usd": 3975.0
+  }
+}

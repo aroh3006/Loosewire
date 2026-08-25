@@ -10,7 +10,7 @@ import re
 
 from backend.parsers.base import CodeBlock, SourceFile
 
-DEF_RE = re.compile(r"^(?P<indent>[ \t]*)def\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*\(")
+DEF_RE = re.compile(r"^(?P<indent>[ \t]*)(?:async\s+)?def\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*\(")
 
 # @app.route("/x", methods=["POST"])  @app.post("/x")  @router.get("/x")
 DECORATOR_RE = re.compile(
