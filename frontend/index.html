@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loosewire</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">LW</span>
+      <span class="brand-name">Loosewire</span>
+    </div>
+    <nav class="tabs" id="nav-tabs">
+      <button class="tab active" data-view="upload">Upload</button>
+      <button class="tab" data-view="findings">Findings</button>
+      <button class="tab" data-view="metrics">Metrics</button>
+    </nav>
+  </header>
+
+  <main class="content">
+
+    <section id="view-upload" class="view active">
+      <div class="panel">
+        <h1>Scan checkout integration code</h1>
+        <p class="muted">
+          Upload a zip of your project, or an APK file. The archive is extracted into a
+          temporary directory on the server, scanned, and deleted immediately after the
+          report is generated. Nothing is stored and no external network calls are made.
+        </p>
+
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="file-input" accept=".zip,.apk" hidden>
+          <div class="dropzone-inner">
+            <p class="dropzone-title">Drop a .zip or .apk here, or click to choose a file</p>
+            <p class="dropzone-hint">Max 50 MB</p>
+          </div>
+        </div>
+
+        <div id="upload-status" class="upload-status"></div>
+
+        <div class="rule-summary">
+          <h2>What this checks</h2>
+          <ul class="rule-list">
+            <li><span class="rule-name">Missing signature verification</span> — order completion code that never checks a signature or HMAC before marking an order paid.</li>
+            <li><span class="rule-name">Exposed secret key</span> — secret-looking values hardcoded into source, especially code that ships to a browser or gets bundled into a mobile app.</li>
+            <li><span class="rule-name">Missing webhook signature check</span> — webhook/callback handlers that trust the payload without verifying a signature header.</li>
+            <li><span class="rule-name">Missing amount validation</span> — order completion logic that never compares the confirmed amount to the amount stored at order creation.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-findings" class="view">
+      <div class="panel">
+        <div class="findings-header">
+          <h1>Findings</h1>
+          <div class="findings-meta" id="findings-meta"></div>
+        </div>
+        <div id="findings-empty" class="empty-state">
+          No scan yet. Upload a project on the Upload tab to see findings here.
+        </div>
+        <div id="findings-table-wrap" class="table-wrap" style="display:none">
+          <table class="findings-table">
+            <thead>
+              <tr>
+                <th>Severity</th>
+                <th>Confidence</th>
+                <th>Rule</th>
+                <th>Location</th>
+                <th>Description</th>
+                <th>Fix</th>
+              </tr>
+            </thead>
+            <tbody id="findings-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-metrics" class="view">
+      <div class="panel">
+        <h1>Detection accuracy</h1>
+        <p class="muted">
+          Computed by running the scanner against a held-out fixture set that was never
+          used to tune the detection rules. Numbers below reflect real precision and
+          recall, not a curated best case.
+        </p>
+        <div id="metrics-content"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
