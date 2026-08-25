@@ -152,7 +152,7 @@
     const values = order.map((k) => bySeverity[k] || 0);
     const total = values.reduce((a, b) => a + b, 0);
 
-    const r = 52, cx = 64, cy = 64, sw = 16;
+    const r = 68, cx = 84, cy = 84, sw = 20;
     const circumference = 2 * Math.PI * r;
     let offset = 0;
     let circles = "";
@@ -174,9 +174,9 @@
       }
     }
 
-    const svg = '<svg viewBox="0 0 128 128" width="128" height="128">' + circles +
+    const svg = '<svg viewBox="0 0 168 168" width="168" height="168">' + circles +
       '<text x="' + cx + '" y="' + (cy - 4) + '" text-anchor="middle" class="donut-total-label" fill="' + cssVar("--text") + '">' + total + '</text>' +
-      '<text x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle" class="donut-total-sub" fill="' + cssVar("--text-muted") + '">FINDINGS</text>' +
+      '<text x="' + cx + '" y="' + (cy + 18) + '" text-anchor="middle" class="donut-total-sub" fill="' + cssVar("--text-muted") + '">FINDINGS</text>' +
       '</svg>';
 
     let legend = '<ul class="legend">';
@@ -193,10 +193,10 @@
   }
 
   function gaugeSvg(value, color) {
-    const r = 34, cx = 40, cy = 40, sw = 8;
+    const r = 44, cx = 52, cy = 52, sw = 10;
     const circumference = 2 * Math.PI * r;
     const len = value * circumference;
-    return '<svg viewBox="0 0 80 80" width="80" height="80">' +
+    return '<svg viewBox="0 0 104 104" width="104" height="104">' +
       '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + cssVar("--bg-sunken") + '" stroke-width="' + sw + '"/>' +
       '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="' + sw +
       '" stroke-linecap="round" stroke-dasharray="' + len + " " + circumference +
@@ -224,9 +224,16 @@
 
   function barsHtml(perRule) {
     const maxCount = Math.max(1, ...perRule.flatMap((r) => [r.tp, r.fp, r.fn]));
-    let html = '<div class="bar-rows">';
+
+    let html = '<div class="bar-legend">' +
+      '<span class="bar-legend-item"><span class="bar-legend-dot" style="background:' + cssVar("--positive") + '"></span>True positive</span>' +
+      '<span class="bar-legend-item"><span class="bar-legend-dot" style="background:' + cssVar("--critical") + '"></span>False positive</span>' +
+      '<span class="bar-legend-item"><span class="bar-legend-dot" style="background:' + cssVar("--medium") + '"></span>False negative</span>' +
+      "</div>";
+
+    html += '<div class="rule-cards">';
     for (const r of perRule) {
-      html += '<div><div class="bar-row-label">' + r.rule.replace(/_/g, " ") + '</div><div class="bar-group">';
+      html += '<div class="rule-card"><div class="rule-card-title">' + r.rule.replace(/_/g, " ") + '</div><div class="bar-group">';
       html += barLine("TP", r.tp, maxCount, "tp");
       html += barLine("FP", r.fp, maxCount, "fp");
       html += barLine("FN", r.fn, maxCount, "fn");
