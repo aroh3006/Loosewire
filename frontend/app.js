@@ -226,7 +226,8 @@
       '<span class="confidence-note">' + f.confidence + " confidence</span></div>" +
       '<div class="detail-title">' + escapeHtml(f.description) + "</div>" +
       '<div class="code-ref"><div class="code-ref-path">' + escapeHtml(f.file) + '</div>' +
-      '<div class="code-ref-line">line ' + f.line + "</div></div>" +
+      '<div class="code-ref-body"><div class="code-ref-gutter">' + f.line + '</div>' +
+      '<div class="code-ref-line">' + escapeHtml(f.rule.replace(/_/g, " ")) + " flagged at this line</div></div></div>" +
       '<div class="detail-block"><div class="detail-block-label">Why it matters</div>' +
       '<div class="detail-block-body">' + (WHY_IT_MATTERS[f.rule] ||
         "This pattern was flagged based on how the code path is structured; review it in context before dismissing or fixing it.") +
@@ -380,32 +381,4 @@
     return '<div class="fact-row"><span class="n tabular">' + value + '</span><span class="l">' + label + "</span></div>";
   }
 
-  /* ---------- theme ---------- */
-
-  const themeToggle = document.getElementById("theme-toggle");
-
-  function currentTheme() {
-    return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
-  }
-
-  function applyThemeLabel() {
-    themeToggle.textContent = currentTheme() === "light" ? "Dark mode" : "Light mode";
-  }
-
-  function setTheme(theme) {
-    if (theme === "light") {
-      document.documentElement.setAttribute("data-theme", "light");
-    } else {
-      document.documentElement.removeAttribute("data-theme");
-    }
-    document.cookie = "theme=" + theme + "; path=/; max-age=31536000; samesite=lax";
-    applyThemeLabel();
-    if (metricsLoaded) {
-      metricsLoaded = false;
-      loadMetrics();
-    }
-  }
-
-  themeToggle.addEventListener("click", () => setTheme(currentTheme() === "light" ? "dark" : "light"));
-  applyThemeLabel();
 })();
