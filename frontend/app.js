@@ -75,6 +75,9 @@
   const findingsWrap = document.getElementById("findings-table-wrap");
   const findingsBody = document.getElementById("findings-tbody");
   const findingsMeta = document.getElementById("findings-meta");
+  const severitySummary = document.getElementById("severity-summary");
+
+  const SEVERITY_ORDER = ["critical", "high", "medium", "low"];
 
   function renderFindings(report) {
     findingsBody.innerHTML = "";
@@ -84,6 +87,7 @@
       findingsEmpty.textContent = "No issues found in " + report.files_scanned + " file(s) scanned.";
       findingsWrap.style.display = "none";
       findingsMeta.textContent = "";
+      severitySummary.style.display = "none";
       return;
     }
 
@@ -93,29 +97,74 @@
       report.findings.length + " finding(s) · " + report.files_scanned + " file(s) scanned" +
       (report.frameworks_detected.length ? " · " + report.frameworks_detected.join(", ") : "");
 
-    for (const f of report.findings) {
+    const counts = { critical: 0, high: 0, medium: 0, low: 0 };
+    for (const f of report.findings) if (f.severity in counts) counts[f.severity]++;
+    severitySummary.style.display = "flex";
+    severitySummary.innerHTML = SEVERITY_ORDER.map((s) =>
+      '<span class="severity-summary-item"><span class="dot" style="background:' + cssVar("--" + s) + '"></span>' +
+      s.charAt(0).toUpperCase() + s.slice(1) + ' <span class="count">' + counts[s] + "</span></span>"
+    ).join("");
+
+    report.findings.forEach((f, i) => {
       const tr = document.createElement("tr");
+      tr.dataset.index = i;
       tr.innerHTML =
-        '<td><span class="tag ' + f.severity + '">' + severityIcon(f.severity) + f.severity + "</span></td>" +
+        '<td><span class="tag ' + f.severity + '"><span class="dot"></span>' + f.severity + "</span></td>" +
         '<td><span class="confidence">' + f.confidence + "</span></td>" +
-        "<td>" + f.rule.replace(/_/g, " ") + "</td>" +
+        '<td class="rule-cell">' + f.rule.replace(/_/g, " ") + "</td>" +
         '<td class="location">' + escapeHtml(f.file) + ":" + f.line + "</td>" +
-        "<td>" + escapeHtml(f.description) + "</td>" +
+        '<td class="description">' + escapeHtml(f.description) + "</td>" +
         '<td class="fix">' + escapeHtml(f.fix) + "</td>";
+      tr.addEventListener("click", () => openDetail(f));
       findingsBody.appendChild(tr);
-    }
+    });
   }
 
-  const SEVERITY_ICONS = {
-    critical: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
-    high: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
-    medium: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
-    low: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+  const WHY_IT_MATTERS = {
+    missing_signature_verification:
+      "Without a signature check, anyone who knows or guesses an order id can call this path directly and mark the order as paid without a real payment ever happening.",
+    missing_webhook_signature:
+      "A forged callback to this endpoint would be processed the same as a genuine one, letting an attacker trigger order-completion logic on demand.",
+    missing_amount_validation:
+      "The amount being confirmed is never checked against what the order actually cost, so a client can report a lower amount than the one that should have been charged.",
+    exposed_secret_key:
+      "A secret shipped to a browser or bundled into an app can be extracted by anyone who inspects the client, letting them act as the merchant against the gateway.",
   };
 
-  function severityIcon(severity) {
-    return SEVERITY_ICONS[severity] || "";
+  const detailOverlay = document.getElementById("detail-overlay");
+  const detailPanel = document.getElementById("detail-panel");
+  const detailClose = document.getElementById("detail-close");
+  const detailSeverityTag = document.getElementById("detail-severity-tag");
+  const detailTitle = document.getElementById("detail-title");
+  const detailLocation = document.getElementById("detail-location");
+  const detailWhy = document.getElementById("detail-why");
+  const detailFix = document.getElementById("detail-fix");
+  const detailConfidence = document.getElementById("detail-confidence");
+
+  function openDetail(f) {
+    detailSeverityTag.className = "tag " + f.severity;
+    detailSeverityTag.innerHTML = '<span class="dot"></span>' + f.severity;
+    detailTitle.textContent = f.description;
+    detailLocation.textContent = f.file + ":" + f.line;
+    detailWhy.textContent = WHY_IT_MATTERS[f.rule] || "This pattern was flagged based on how the code path is structured; review it in context before dismissing or fixing it.";
+    detailFix.textContent = f.fix;
+    detailConfidence.textContent =
+      f.confidence.charAt(0).toUpperCase() + f.confidence.slice(1) +
+      " confidence — " + (f.rule || "").replace(/_/g, " ");
+    detailOverlay.classList.add("open");
+    detailPanel.classList.add("open");
   }
+
+  function closeDetail() {
+    detailOverlay.classList.remove("open");
+    detailPanel.classList.remove("open");
+  }
+
+  detailClose.addEventListener("click", closeDetail);
+  detailOverlay.addEventListener("click", closeDetail);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeDetail();
+  });
 
   function escapeHtml(s) {
     const div = document.createElement("div");

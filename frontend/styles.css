@@ -503,90 +503,129 @@ button.outline:hover { border-color: var(--accent); color: var(--accent); }
   .check-list { grid-template-columns: 1fr; }
 }
 
-/* ---------- findings + metrics: legacy rules, pending their own redesign pass ---------- */
+/* ---------- findings ---------- */
 
 .findings-header {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
 }
 
 .findings-meta {
-  color: var(--text-muted);
-  font-size: 14px;
+  color: var(--text-tertiary);
+  font-size: 13.5px;
+}
+
+.severity-summary {
+  display: flex;
+  gap: 22px;
+  margin: 18px 0 32px;
+  flex-wrap: wrap;
+}
+
+.severity-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.severity-summary-item .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.severity-summary-item .count {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
 }
 
 .empty-state {
-  color: var(--text-muted);
-  padding: 64px 0;
+  color: var(--text-tertiary);
+  padding: 56px 0;
   text-align: center;
-  font-size: 14.5px;
+  font-size: 14px;
 }
 
 .table-wrap {
   overflow-x: auto;
   padding: 0;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
 }
 
 .findings-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14.5px;
+  font-size: 13.5px;
 }
 
 .findings-table th {
   text-align: left;
-  font-weight: 700;
-  font-size: 12px;
+  font-weight: 600;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
-  padding: 16px 20px;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  padding: 13px 18px;
   background: var(--bg-sunken);
-  border-bottom: 1px solid var(--border-soft);
+  border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
 
 .findings-table td {
-  padding: 18px 20px;
+  padding: 15px 18px;
   border-bottom: 1px solid var(--border-soft);
   vertical-align: top;
 }
 
-.findings-table tbody tr:nth-child(even) { background: var(--bg-row-alt); }
 .findings-table tbody tr {
-  transition: background-color 0.15s ease;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
 }
 .findings-table tbody tr:hover { background: var(--bg-sunken); }
 
 .findings-table tr:last-child td { border-bottom: none; }
 
+.findings-table td.rule-cell {
+  font-weight: 600;
+  color: var(--text);
+  text-transform: capitalize;
+}
+
 .findings-table td.location {
-  font-family: var(--font);
-  font-size: 13px;
-  color: var(--text-muted);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
-.findings-table td.fix { color: var(--text-muted); }
+.findings-table td.fix { color: var(--text-secondary); }
+.findings-table td.description { color: var(--text-secondary); }
 
 .tag {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px 4px 8px;
+  gap: 6px;
+  padding: 3px 9px 3px 8px;
   border-radius: var(--radius-pill);
-  font-size: 11.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+  letter-spacing: 0.01em;
   white-space: nowrap;
-  border: 1px solid transparent;
 }
 
-.tag svg {
-  width: 12px;
-  height: 12px;
+.tag .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
   flex-shrink: 0;
 }
 
@@ -596,8 +635,117 @@ button.outline:hover { border-color: var(--accent); color: var(--accent); }
 .tag.low { color: var(--low); background: var(--low-bg); }
 
 .confidence {
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+}
+
+/* ---------- finding detail panel ---------- */
+
+.detail-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 8, 0.28);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 40;
+}
+
+.detail-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.detail-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 420px;
+  max-width: 92vw;
+  background: var(--bg-elevated);
+  border-left: 1px solid var(--border);
+  box-shadow: -8px 0 28px rgba(0, 0, 0, 0.1);
+  transform: translateX(100%);
+  transition: transform 0.18s ease;
+  z-index: 41;
+  overflow-y: auto;
+}
+
+.detail-panel.open { transform: translateX(0); }
+
+.detail-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.detail-close {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  border-radius: var(--radius-sm);
+  transition: color 0.12s ease, background-color 0.12s ease;
+}
+
+.detail-close:hover { color: var(--text); background: var(--bg-sunken); }
+.detail-close svg { width: 18px; height: 18px; }
+
+.detail-body {
+  padding: 24px;
+}
+
+.detail-title {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 10px 0 20px;
+  line-height: 1.35;
+}
+
+.detail-section {
+  margin-bottom: 24px;
+}
+
+.detail-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+
+.detail-section-body {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.detail-location {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
   font-size: 13px;
-  color: var(--text-muted);
+  background: var(--bg-sunken);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  display: inline-block;
+  color: var(--text);
+}
+
+.detail-fix {
+  background: var(--accent-tint);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.55;
 }
 
 .charts-row {

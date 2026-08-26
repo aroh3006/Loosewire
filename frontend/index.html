@@ -149,11 +149,12 @@
             <h1>Findings</h1>
             <div class="findings-meta" id="findings-meta"></div>
           </div>
+          <div class="severity-summary" id="severity-summary" style="display:none"></div>
         </div>
         <div id="findings-empty" class="empty-state panel">
           No scan yet. Upload a project on the Scan tab to see findings here.
         </div>
-        <div id="findings-table-wrap" class="table-wrap panel" style="display:none">
+        <div id="findings-table-wrap" class="table-wrap" style="display:none">
           <table class="findings-table">
             <thead>
               <tr>
@@ -169,6 +170,39 @@
           </table>
         </div>
       </section>
+
+      <div class="detail-overlay" id="detail-overlay"></div>
+      <aside class="detail-panel" id="detail-panel">
+        <div class="detail-panel-head">
+          <span class="tag" id="detail-severity-tag"></span>
+          <button class="detail-close" id="detail-close" type="button" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="detail-body">
+          <div class="detail-title" id="detail-title"></div>
+
+          <div class="detail-section">
+            <div class="detail-section-label">Location</div>
+            <div class="detail-location" id="detail-location"></div>
+          </div>
+
+          <div class="detail-section">
+            <div class="detail-section-label">Why it matters</div>
+            <div class="detail-section-body" id="detail-why"></div>
+          </div>
+
+          <div class="detail-section">
+            <div class="detail-section-label">Recommended fix</div>
+            <div class="detail-fix" id="detail-fix"></div>
+          </div>
+
+          <div class="detail-section">
+            <div class="detail-section-label">Confidence</div>
+            <div class="detail-section-body" id="detail-confidence"></div>
+          </div>
+        </div>
+      </aside>
 
       <section id="view-metrics" class="view">
         <div class="view-head">
