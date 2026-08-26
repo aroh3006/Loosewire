@@ -12,10 +12,44 @@
 
   tabs.forEach((t) => t.addEventListener("click", () => showView(t.dataset.view)));
 
+  function cssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function escapeHtml(s) {
+    const div = document.createElement("div");
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  function pct(x) {
+    return (x * 100).toFixed(1) + "%";
+  }
+
+  const SEVERITY_ORDER = ["critical", "high", "medium", "low"];
+
+  function severityDistHtml(counts) {
+    const max = Math.max(1, ...SEVERITY_ORDER.map((k) => counts[k] || 0));
+    let html = "";
+    for (const key of SEVERITY_ORDER) {
+      const v = counts[key] || 0;
+      const widthPct = v === 0 ? 0 : Math.max(4, (v / max) * 100);
+      html += '<div class="severity-dist-row">' +
+        '<span class="severity-dist-label">' + key + "</span>" +
+        '<span class="severity-dist-track"><span class="severity-dist-fill" style="width:' + widthPct +
+        "%;background:" + cssVar("--" + key) + '"></span></span>' +
+        '<span class="severity-dist-count">' + v + "</span></div>";
+    }
+    return html;
+  }
+
+  /* ---------- scan ---------- */
+
   const dropzone = document.getElementById("dropzone");
   const fileInput = document.getElementById("file-input");
   const statusEl = document.getElementById("upload-status");
   const chooseFileBtn = document.getElementById("choose-file-btn");
+  const scanStagesWrap = document.getElementById("scan-stages-wrap");
 
   dropzone.addEventListener("click", () => fileInput.click());
   chooseFileBtn.addEventListener("click", (e) => {
@@ -41,6 +75,29 @@
     statusEl.className = "upload-status" + (kind ? " " + kind : "");
   }
 
+  const SCAN_STAGES = [
+    "Extracting archive",
+    "Discovering source files",
+    "Evaluating signatures",
+    "Checking webhook handling",
+    "Validating amounts",
+    "Checking secret exposure",
+  ];
+
+  function renderStages(doneCount, runningIndex) {
+    let html = '<div class="scan-stages">';
+    SCAN_STAGES.forEach((label, i) => {
+      const state = i < doneCount ? "done" : i === runningIndex ? "running" : "";
+      const statusText = i < doneCount ? "Complete" : i === runningIndex ? "Running" : "—";
+      html += '<div class="scan-stage ' + state + '">' +
+        '<span class="scan-stage-index">' + String(i + 1).padStart(2, "0") + "</span>" +
+        '<span class="scan-stage-name">' + label + "</span>" +
+        '<span class="scan-stage-status">' + statusText + "</span></div>";
+    });
+    html += "</div>";
+    scanStagesWrap.innerHTML = html;
+  }
+
   async function uploadFile(file) {
     const ext = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
     if (ext !== ".zip" && ext !== ".apk") {
@@ -48,7 +105,16 @@
       return;
     }
 
-    setStatus("Scanning " + file.name + " …", "info");
+    setStatus("Scanning " + file.name, "info");
+
+    let stageIndex = 0;
+    renderStages(0, 0);
+    const stageTimer = setInterval(() => {
+      if (stageIndex < SCAN_STAGES.length - 1) {
+        stageIndex++;
+        renderStages(stageIndex, stageIndex);
+      }
+    }, 420);
 
     const form = new FormData();
     form.append("file", file);
@@ -56,69 +122,41 @@
     try {
       const res = await fetch("/api/scan", { method: "POST", body: form });
       const body = await res.json();
+      clearInterval(stageTimer);
+      renderStages(SCAN_STAGES.length, -1);
+      setTimeout(() => { scanStagesWrap.innerHTML = ""; }, 900);
+
       if (!res.ok) {
         setStatus(body.detail || "Scan failed.", "error");
         return;
       }
       setStatus(
-        "Scan complete: " + body.findings.length + " finding(s) across " + body.files_scanned + " file(s).",
+        "Scan complete — " + body.findings.length + " finding(s) across " + body.files_scanned + " file(s).",
         "success"
       );
       renderFindings(body);
       showView("findings");
     } catch (err) {
+      clearInterval(stageTimer);
+      scanStagesWrap.innerHTML = "";
       setStatus("Could not reach the scanner: " + err.message, "error");
     }
   }
 
+  /* ---------- findings ---------- */
+
+  const findingsTitle = document.getElementById("findings-title");
+  const findingsCount = document.getElementById("findings-count");
   const findingsEmpty = document.getElementById("findings-empty");
-  const findingsWrap = document.getElementById("findings-table-wrap");
-  const findingsBody = document.getElementById("findings-tbody");
-  const findingsMeta = document.getElementById("findings-meta");
-  const severitySummary = document.getElementById("severity-summary");
+  const findingsBodyWrap = document.getElementById("findings-body");
+  const findingsSeverityDist = document.getElementById("findings-severity-dist");
+  const findingList = document.getElementById("finding-list");
+  const findingDetailContent = document.getElementById("finding-detail-content");
+  const investigation = document.getElementById("investigation");
+  const findingBack = document.getElementById("finding-back");
 
-  const SEVERITY_ORDER = ["critical", "high", "medium", "low"];
-
-  function renderFindings(report) {
-    findingsBody.innerHTML = "";
-
-    if (!report.findings.length) {
-      findingsEmpty.style.display = "block";
-      findingsEmpty.textContent = "No issues found in " + report.files_scanned + " file(s) scanned.";
-      findingsWrap.style.display = "none";
-      findingsMeta.textContent = "";
-      severitySummary.style.display = "none";
-      return;
-    }
-
-    findingsEmpty.style.display = "none";
-    findingsWrap.style.display = "block";
-    findingsMeta.textContent =
-      report.findings.length + " finding(s) · " + report.files_scanned + " file(s) scanned" +
-      (report.frameworks_detected.length ? " · " + report.frameworks_detected.join(", ") : "");
-
-    const counts = { critical: 0, high: 0, medium: 0, low: 0 };
-    for (const f of report.findings) if (f.severity in counts) counts[f.severity]++;
-    severitySummary.style.display = "flex";
-    severitySummary.innerHTML = SEVERITY_ORDER.map((s) =>
-      '<span class="severity-summary-item"><span class="dot" style="background:' + cssVar("--" + s) + '"></span>' +
-      s.charAt(0).toUpperCase() + s.slice(1) + ' <span class="count">' + counts[s] + "</span></span>"
-    ).join("");
-
-    report.findings.forEach((f, i) => {
-      const tr = document.createElement("tr");
-      tr.dataset.index = i;
-      tr.innerHTML =
-        '<td><span class="tag ' + f.severity + '"><span class="dot"></span>' + f.severity + "</span></td>" +
-        '<td><span class="confidence">' + f.confidence + "</span></td>" +
-        '<td class="rule-cell">' + f.rule.replace(/_/g, " ") + "</td>" +
-        '<td class="location">' + escapeHtml(f.file) + ":" + f.line + "</td>" +
-        '<td class="description">' + escapeHtml(f.description) + "</td>" +
-        '<td class="fix">' + escapeHtml(f.fix) + "</td>";
-      tr.addEventListener("click", () => openDetail(f));
-      findingsBody.appendChild(tr);
-    });
-  }
+  let currentFindings = [];
+  let selectedIndex = 0;
 
   const WHY_IT_MATTERS = {
     missing_signature_verification:
@@ -131,48 +169,78 @@
       "A secret shipped to a browser or bundled into an app can be extracted by anyone who inspects the client, letting them act as the merchant against the gateway.",
   };
 
-  const detailOverlay = document.getElementById("detail-overlay");
-  const detailPanel = document.getElementById("detail-panel");
-  const detailClose = document.getElementById("detail-close");
-  const detailSeverityTag = document.getElementById("detail-severity-tag");
-  const detailTitle = document.getElementById("detail-title");
-  const detailLocation = document.getElementById("detail-location");
-  const detailWhy = document.getElementById("detail-why");
-  const detailFix = document.getElementById("detail-fix");
-  const detailConfidence = document.getElementById("detail-confidence");
+  function renderFindings(report) {
+    currentFindings = report.findings;
+    selectedIndex = 0;
 
-  function openDetail(f) {
-    detailSeverityTag.className = "tag " + f.severity;
-    detailSeverityTag.innerHTML = '<span class="dot"></span>' + f.severity;
-    detailTitle.textContent = f.description;
-    detailLocation.textContent = f.file + ":" + f.line;
-    detailWhy.textContent = WHY_IT_MATTERS[f.rule] || "This pattern was flagged based on how the code path is structured; review it in context before dismissing or fixing it.";
-    detailFix.textContent = f.fix;
-    detailConfidence.textContent =
-      f.confidence.charAt(0).toUpperCase() + f.confidence.slice(1) +
-      " confidence — " + (f.rule || "").replace(/_/g, " ");
-    detailOverlay.classList.add("open");
-    detailPanel.classList.add("open");
+    if (!report.findings.length) {
+      findingsTitle.textContent = "No issues found";
+      findingsCount.textContent = report.files_scanned + " file(s) scanned";
+      findingsEmpty.style.display = "block";
+      findingsEmpty.textContent = "No issues found in " + report.files_scanned + " file(s) scanned.";
+      findingsBodyWrap.style.display = "none";
+      return;
+    }
+
+    findingsTitle.textContent = report.findings.length + " finding" + (report.findings.length === 1 ? "" : "s");
+    findingsCount.textContent = report.files_scanned + " file(s) scanned" +
+      (report.frameworks_detected.length ? " · " + report.frameworks_detected.join(", ") : "");
+
+    const counts = { critical: 0, high: 0, medium: 0, low: 0 };
+    for (const f of report.findings) if (f.severity in counts) counts[f.severity]++;
+    findingsSeverityDist.innerHTML = severityDistHtml(counts);
+
+    findingsEmpty.style.display = "none";
+    findingsBodyWrap.style.display = "block";
+    investigation.classList.remove("show-detail");
+
+    renderFindingList();
+    renderFindingDetail();
   }
 
-  function closeDetail() {
-    detailOverlay.classList.remove("open");
-    detailPanel.classList.remove("open");
+  function renderFindingList() {
+    findingList.innerHTML = currentFindings.map((f, i) =>
+      '<button class="finding-row' + (i === selectedIndex ? " selected" : "") + '" data-index="' + i + '">' +
+      '<div class="finding-row-top"><span class="severity-mark" style="background:' + cssVar("--" + f.severity) + '"></span>' +
+      '<span class="finding-row-rule">' + f.rule.replace(/_/g, " ") + "</span></div>" +
+      '<div class="finding-row-loc">' + escapeHtml(f.file) + ":" + f.line + "</div>" +
+      "</button>"
+    ).join("");
+
+    findingList.querySelectorAll(".finding-row").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        selectedIndex = parseInt(btn.dataset.index, 10);
+        renderFindingList();
+        renderFindingDetail();
+        investigation.classList.add("show-detail");
+      });
+    });
   }
 
-  detailClose.addEventListener("click", closeDetail);
-  detailOverlay.addEventListener("click", closeDetail);
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeDetail();
-  });
+  function renderFindingDetail() {
+    const f = currentFindings[selectedIndex];
+    if (!f) return;
 
-  function escapeHtml(s) {
-    const div = document.createElement("div");
-    div.textContent = s;
-    return div.innerHTML;
+    findingDetailContent.innerHTML =
+      '<div class="detail-severity-row"><span class="severity-tag ' + f.severity + '">' + f.severity + "</span>" +
+      '<span class="confidence-note">' + f.confidence + " confidence</span></div>" +
+      '<div class="detail-title">' + escapeHtml(f.description) + "</div>" +
+      '<div class="code-ref"><div class="code-ref-path">' + escapeHtml(f.file) + '</div>' +
+      '<div class="code-ref-line">line ' + f.line + "</div></div>" +
+      '<div class="detail-block"><div class="detail-block-label">Why it matters</div>' +
+      '<div class="detail-block-body">' + (WHY_IT_MATTERS[f.rule] ||
+        "This pattern was flagged based on how the code path is structured; review it in context before dismissing or fixing it.") +
+      "</div></div>" +
+      '<div class="detail-block"><div class="detail-block-label">Recommended fix</div>' +
+      '<div class="detail-fix">' + escapeHtml(f.fix) + "</div></div>";
   }
+
+  findingBack.addEventListener("click", () => investigation.classList.remove("show-detail"));
+
+  /* ---------- metrics ---------- */
 
   const metricsContent = document.getElementById("metrics-content");
+  const metricsScope = document.getElementById("metrics-scope");
   let metricsLoaded = false;
 
   async function loadMetrics() {
@@ -192,52 +260,61 @@
     }
   }
 
-  function pct(x) {
-    return (x * 100).toFixed(1) + "%";
-  }
-
-  function cssVar(name) {
-    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  }
-
-  function metricHeroRowHtml(o) {
+  function perfScaleRowsHtml(o) {
     const items = [
       { label: "Precision", value: o.precision },
       { label: "Recall", value: o.recall },
-      { label: "F1 score", value: o.f1 },
+      { label: "F1", value: o.f1 },
     ];
-    let html = '<div class="metric-hero-row">';
+    let html = '<div class="perf-scale-rows">';
     for (const it of items) {
-      html += '<div class="metric-hero">' +
-        '<div class="metric-hero-value">' + pct(it.value) + "</div>" +
-        '<div class="metric-hero-bar"><div class="metric-hero-bar-fill" style="width:' + (it.value * 100) + '%"></div></div>' +
-        '<div class="metric-hero-label">' + it.label + "</div></div>";
+      html += '<div class="perf-scale-row">' +
+        '<span class="perf-scale-label">' + it.label + "</span>" +
+        '<span class="perf-scale-value tabular">' + pct(it.value) + "</span>" +
+        '<span class="perf-scale-track"><span class="perf-scale-fill" style="width:' + (it.value * 100) + '%"></span>' +
+        '<span class="perf-scale-dot" style="left:' + (it.value * 100) + '%"></span></span>' +
+        "</div>";
     }
     html += "</div>";
     return html;
   }
 
-  function severityBarsHtml(bySeverity) {
-    const order = ["critical", "high", "medium", "low"];
-    const colors = { critical: cssVar("--critical"), high: cssVar("--high"), medium: cssVar("--medium"), low: cssVar("--low") };
-    const values = order.map((k) => bySeverity[k] || 0);
-    const max = Math.max(1, ...values);
+  function profilePlotHtml(o) {
+    const items = [
+      { label: "Precision", value: o.precision, color: cssVar("--info") },
+      { label: "Recall", value: o.recall, color: cssVar("--positive") },
+      { label: "F1", value: o.f1, color: cssVar("--text") },
+    ];
 
-    let html = '<div class="severity-bars">';
-    for (const key of order) {
-      const v = bySeverity[key] || 0;
-      const widthPct = v === 0 ? 0 : Math.max(3, (v / max) * 100);
-      html += '<div class="severity-bar-row">' +
-        '<span class="severity-bar-label">' + key.charAt(0).toUpperCase() + key.slice(1) + "</span>" +
-        '<span class="severity-bar-track"><span class="severity-bar-fill" style="width:' + widthPct + "%;background:" + colors[key] + '"></span></span>' +
-        '<span class="severity-bar-count">' + v + "</span></div>";
+    // Assign each label a vertical tier so labels for close-together values
+    // (F1 always sits between precision and recall) don't collide. Sorting
+    // by value and alternating tiers guarantees neighbors never share one,
+    // with no risk of the assignment never settling.
+    const sorted = items.map((it, i) => ({ ...it, i })).sort((a, b) => a.value - b.value);
+    sorted.forEach((it, rank) => {
+      items[it.i].tier = rank % 2;
+    });
+
+    let nodes = "";
+    let labels = "";
+    for (const it of items) {
+      const leftPct = it.value * 100;
+      const labelTop = it.tier * 32;
+      const connectorHeight = 10 + it.tier * 32;
+      nodes += '<span class="profile-node" style="left:' + leftPct + "%;background:" + it.color + '"></span>' +
+        '<span class="profile-connector" style="left:' + leftPct + "%;height:" + connectorHeight + "px;background:" + it.color + '"></span>';
+      labels += '<span class="profile-label" style="left:' + leftPct + "%;top:" + labelTop + 'px">' + it.label +
+        '<span class="val">' + pct(it.value) + "</span></span>";
     }
-    html += "</div>";
-    return html;
+    return '<div class="profile-plot">' +
+      '<div class="profile-axis-line">' + nodes + "</div>" +
+      '<div class="profile-labels">' + labels + "</div>" +
+      '<div class="profile-scale-caption"><span>0%</span><span>100%</span></div>' +
+      "</div>";
   }
 
-  function ruleTableHtml(perRule) {
-    let html = '<table class="rule-table"><thead><tr>' +
+  function ruleMatrixHtml(perRule) {
+    let html = '<table class="rule-matrix"><thead><tr>' +
       "<th>Rule</th><th>TP</th><th>FP</th><th>FN</th><th>Precision</th><th>Recall</th>" +
       "</tr></thead><tbody>";
     for (const r of perRule) {
@@ -247,7 +324,7 @@
         "<td>" + r.tp + "</td>" +
         "<td>" + r.fp + "</td>" +
         "<td>" + r.fn + "</td>" +
-        '<td><span class="perf-cell"><span class="perf-dot' + (imperfect ? " imperfect" : "") + '"></span>' + pct(r.precision) + "</span></td>" +
+        "<td>" + pct(r.precision) + "</td>" +
         "<td>" + pct(r.recall) + "</td>" +
         "</tr>";
     }
@@ -261,35 +338,37 @@
     const totalFp = data.per_rule.reduce((a, r) => a + r.fp, 0);
     const totalFn = data.per_rule.reduce((a, r) => a + r.fn, 0);
 
+    metricsScope.textContent = "Held-out evaluation · " + data.fixture_count + " fixtures";
+
     let html = "";
 
-    html += '<div class="metrics-scope">Held-out evaluation set &middot; ' + data.fixture_count + " fixtures</div>";
+    html += '<div class="metrics-section">' + perfScaleRowsHtml(o) + "</div>";
 
-    html += '<div class="metrics-section">' + metricHeroRowHtml(o) + "</div>";
+    html += '<hr class="rule"><div class="metrics-section"><div class="section-label">Detection profile</div>' +
+      profilePlotHtml(o) + "</div>";
 
-    html += '<div class="metrics-section"><div class="section-title">Findings by severity</div>' +
-      severityBarsHtml(data.findings_by_severity || {}) + "</div>";
+    html += '<hr class="rule"><div class="metrics-section"><div class="section-label">Finding distribution</div>' +
+      '<div class="severity-dist">' + severityDistHtml(data.findings_by_severity || {}) + "</div></div>";
 
-    html += '<div class="metrics-section"><div class="section-title">Per-rule breakdown</div>' +
-      ruleTableHtml(data.per_rule) + "</div>";
+    html += '<hr class="rule"><div class="metrics-section"><div class="section-label">Rule performance</div>' +
+      ruleMatrixHtml(data.per_rule) + "</div>";
 
-    html += '<div class="metrics-section"><div class="section-title">Evaluation methodology</div>' +
-      '<div class="methodology-box"><p>Results are calculated against a held-out fixture set that was not used ' +
-      "to tune the detection rules. This distinction matters: a scanner tuned against its own test cases can look " +
-      "far more accurate than it actually is on code it has never seen.</p>" +
-      '<div class="fact-list">' +
-      factItem(data.fixture_count, "Fixtures") +
-      factItem(totalTp, "True positives") +
-      factItem(totalFp, "False positives") +
-      factItem(totalFn, "False negatives") +
+    html += '<hr class="rule"><div class="metrics-section"><div class="section-label">Evaluation methodology</div>' +
+      '<div class="methodology-row"><p class="methodology-text">Results are calculated against a held-out fixture ' +
+      "set that was not used to tune the detection rules. This distinction matters: a scanner tuned against its own " +
+      "test cases can look far more accurate than it actually is on code it has never seen.</p>" +
+      '<div class="fact-column">' +
+      factRow(data.fixture_count, "Fixtures") +
+      factRow(totalTp, "True positives") +
+      factRow(totalFp, "False positives") +
+      factRow(totalFn, "False negatives") +
       "</div></div></div>";
 
-    html += '<div class="metrics-section cost-block">' +
-      '<div class="cost-label">Illustrative cost model &middot; estimate, not a measured result</div>' +
-      '<div class="cost-value">$' + Math.round(data.cost.net_savings_usd).toLocaleString() + "</div>" +
-      '<div class="cost-caption">Estimated avoided review and exposure cost versus catching nothing, under the assumptions below.</div>' +
+    html += '<hr class="rule"><div class="metrics-section"><div class="section-label">Estimated cost model</div>' +
+      '<div class="cost-row"><div class="cost-value tabular">$' + Math.round(data.cost.net_savings_usd).toLocaleString() + "</div>" +
+      '<div class="cost-caption">estimated avoided review and exposure cost versus catching nothing</div></div>' +
       '<div class="cost-assumptions">' +
-      "$" + data.cost.false_positive_cost_usd + " assumed per false positive (developer time to triage and dismiss it) &middot; " +
+      "$" + data.cost.false_positive_cost_usd + " assumed per false positive (developer time to triage and dismiss it) · " +
       "$" + data.cost.false_negative_cost_usd + " assumed per false negative (downstream fraud exposure from an unnoticed bug). " +
       "Both figures are stated assumptions, not measured business results." +
       "</div></div>";
@@ -297,24 +376,25 @@
     metricsContent.innerHTML = html;
   }
 
-  function factItem(value, label) {
-    return '<div class="fact-item"><div class="fact-value">' + value + '</div><div class="fact-label">' + label + "</div></div>";
+  function factRow(value, label) {
+    return '<div class="fact-row"><span class="n tabular">' + value + '</span><span class="l">' + label + "</span></div>";
   }
 
+  /* ---------- theme ---------- */
+
   const themeToggle = document.getElementById("theme-toggle");
-  const themeToggleLabel = document.getElementById("theme-toggle-label");
 
   function currentTheme() {
-    return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+    return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
   }
 
   function applyThemeLabel() {
-    themeToggleLabel.textContent = currentTheme() === "dark" ? "Light mode" : "Dark mode";
+    themeToggle.textContent = currentTheme() === "light" ? "Dark mode" : "Light mode";
   }
 
   function setTheme(theme) {
-    if (theme === "dark") {
-      document.documentElement.setAttribute("data-theme", "dark");
+    if (theme === "light") {
+      document.documentElement.setAttribute("data-theme", "light");
     } else {
       document.documentElement.removeAttribute("data-theme");
     }
@@ -326,6 +406,6 @@
     }
   }
 
-  themeToggle.addEventListener("click", () => setTheme(currentTheme() === "dark" ? "light" : "dark"));
+  themeToggle.addEventListener("click", () => setTheme(currentTheme() === "light" ? "dark" : "light"));
   applyThemeLabel();
 })();
