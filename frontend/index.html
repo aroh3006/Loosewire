@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Loosewire</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23121214' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.5 19.5 5.5V11C19.5 16 16.2 19.8 12 21.5 7.8 19.8 4.5 16 4.5 11V5.5Z'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles.css">
 <script>
   (function () {
@@ -17,13 +18,16 @@
 
   <aside class="sidebar">
     <div class="sidebar-brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 19.5 5.5V11C19.5 16 16.2 19.8 12 21.5 7.8 19.8 4.5 16 4.5 11V5.5Z"/></svg>
+      </span>
       <span class="brand-name">Loosewire</span>
     </div>
 
     <nav class="sidebar-nav" id="nav-tabs">
       <button class="nav-item active" data-view="upload">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16l-4-4-4 4"/><path d="M12 12v9"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
-        <span>Upload</span>
+        <span>Scan</span>
       </button>
       <button class="nav-item" data-view="findings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
@@ -36,6 +40,11 @@
     </nav>
 
     <div class="sidebar-bottom">
+      <div class="scanner-status">
+        <span class="status-dot"></span>
+        <span>Scanner ready</span>
+      </div>
+      <div class="env-tag">Local instance</div>
       <button class="nav-item theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -49,35 +58,88 @@
 
       <section id="view-upload" class="view active">
         <div class="view-head">
-          <h1>Scan checkout integration code</h1>
+          <span class="eyebrow">Security analysis</span>
+          <h1>Scan your payment integration.</h1>
           <p class="muted">
-            Upload a zip of your project, or an APK file. The archive is extracted into a
-            temporary directory on the server, scanned, and deleted immediately after the
-            report is generated. Nothing is stored and no external network calls are made.
+            Analyze your checkout integration for implementation mistakes that can turn a
+            working payment flow into an exploitable one.
           </p>
         </div>
 
-        <div class="dropzone" id="dropzone">
-          <input type="file" id="file-input" accept=".zip,.apk" hidden>
-          <div class="dropzone-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16l-4-4-4 4"/><path d="M12 12v9"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+        <div class="scan-panel">
+          <div class="scan-panel-head">
+            <span class="scan-panel-label">Scan project</span>
           </div>
-          <div class="dropzone-inner">
-            <p class="dropzone-title">Drop a .zip or .apk here, or click to choose a file</p>
-            <p class="dropzone-hint">Max 50 MB</p>
+          <div class="dropzone" id="dropzone">
+            <input type="file" id="file-input" accept=".zip,.apk" hidden>
+            <div class="dropzone-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16l-4-4-4 4"/><path d="M12 12v9"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+            </div>
+            <p class="dropzone-title">Drop a project archive here</p>
+            <p class="dropzone-hint">ZIP or APK &middot; Maximum 50 MB</p>
+            <button class="primary" type="button" id="choose-file-btn">Choose file</button>
           </div>
         </div>
 
         <div id="upload-status" class="upload-status"></div>
 
-        <div class="panel rule-summary">
-          <h2>What this checks</h2>
-          <ul class="rule-list">
-            <li><span class="rule-name">Missing signature verification</span> : order completion code that never checks a signature or HMAC before marking an order paid.</li>
-            <li><span class="rule-name">Exposed secret key</span> : secret-looking values hardcoded into source, especially code that ships to a browser or gets bundled into a mobile app.</li>
-            <li><span class="rule-name">Missing webhook signature check</span> : webhook/callback handlers that trust the payload without verifying a signature header.</li>
-            <li><span class="rule-name">Missing amount validation</span> : order completion logic that never compares the confirmed amount to the amount stored at order creation.</li>
-          </ul>
+        <div class="section-title">What we check</div>
+        <ul class="check-list">
+          <li class="check-item">
+            <span class="check-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 2.5 19.5 5.5V11C19.5 16 16.2 19.8 12 21.5 7.8 19.8 4.5 16 4.5 11V5.5Z"/></svg>
+            </span>
+            <div>
+              <div class="check-name">Signature verification</div>
+              <div class="check-desc">Order completion paths must verify a signature before trusting a payment as final.</div>
+            </div>
+          </li>
+          <li class="check-item">
+            <span class="check-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l8-5 8 5v8l-8 5-8-5z"/><path d="M4 8l8 5 8-5"/><path d="M12 13v8"/></svg>
+            </span>
+            <div>
+              <div class="check-name">Webhook verification</div>
+              <div class="check-desc">Callback endpoints must check a signature header before acting on the payload.</div>
+            </div>
+          </li>
+          <li class="check-item">
+            <span class="check-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5c0-1.4 1.1-2.5 2.5-2.5s2.5 1.1 2.5 2.5c0 1.1-1.1 1.8-2 2.3-.7.4-1 .8-1 1.7"/><line x1="12" y1="16.5" x2="12" y2="16.51"/></svg>
+            </span>
+            <div>
+              <div class="check-name">Amount integrity</div>
+              <div class="check-desc">Confirmed amounts must be compared against the amount stored at order creation.</div>
+            </div>
+          </li>
+          <li class="check-item">
+            <span class="check-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="1.5"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            </span>
+            <div>
+              <div class="check-name">Secret exposure</div>
+              <div class="check-desc">Secret-looking values hardcoded into anything shipped to a client or bundled into an app.</div>
+            </div>
+          </li>
+        </ul>
+
+        <div class="scope-strip">
+          <span class="scope-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+            Static analysis
+          </span>
+          <span class="scope-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/></svg>
+            No external network requests
+          </span>
+          <span class="scope-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13a2 2 0 002 2h6a2 2 0 002-2l1-13"/></svg>
+            Files processed temporarily
+          </span>
+          <span class="scope-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+            Test or authorized code only
+          </span>
         </div>
       </section>
 
@@ -89,7 +151,7 @@
           </div>
         </div>
         <div id="findings-empty" class="empty-state panel">
-          No scan yet. Upload a project on the Upload tab to see findings here.
+          No scan yet. Upload a project on the Scan tab to see findings here.
         </div>
         <div id="findings-table-wrap" class="table-wrap panel" style="display:none">
           <table class="findings-table">

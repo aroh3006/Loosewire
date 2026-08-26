@@ -15,8 +15,13 @@
   const dropzone = document.getElementById("dropzone");
   const fileInput = document.getElementById("file-input");
   const statusEl = document.getElementById("upload-status");
+  const chooseFileBtn = document.getElementById("choose-file-btn");
 
   dropzone.addEventListener("click", () => fileInput.click());
+  chooseFileBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    fileInput.click();
+  });
   dropzone.addEventListener("dragover", (e) => {
     e.preventDefault();
     dropzone.classList.add("drag-over");
