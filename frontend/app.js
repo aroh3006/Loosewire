@@ -200,160 +200,105 @@
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   }
 
-  function donutChartHtml(bySeverity) {
+  function metricHeroRowHtml(o) {
+    const items = [
+      { label: "Precision", value: o.precision },
+      { label: "Recall", value: o.recall },
+      { label: "F1 score", value: o.f1 },
+    ];
+    let html = '<div class="metric-hero-row">';
+    for (const it of items) {
+      html += '<div class="metric-hero">' +
+        '<div class="metric-hero-value">' + pct(it.value) + "</div>" +
+        '<div class="metric-hero-bar"><div class="metric-hero-bar-fill" style="width:' + (it.value * 100) + '%"></div></div>' +
+        '<div class="metric-hero-label">' + it.label + "</div></div>";
+    }
+    html += "</div>";
+    return html;
+  }
+
+  function severityBarsHtml(bySeverity) {
     const order = ["critical", "high", "medium", "low"];
     const colors = { critical: cssVar("--critical"), high: cssVar("--high"), medium: cssVar("--medium"), low: cssVar("--low") };
     const values = order.map((k) => bySeverity[k] || 0);
-    const total = values.reduce((a, b) => a + b, 0);
+    const max = Math.max(1, ...values);
 
-    const r = 68, cx = 84, cy = 84, sw = 20;
-    const circumference = 2 * Math.PI * r;
-    let offset = 0;
-    let circles = "";
-
-    if (total === 0) {
-      circles = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' +
-        cssVar("--border") + '" stroke-width="' + sw + '"/>';
-    } else {
-      for (const key of order) {
-        const v = bySeverity[key] || 0;
-        if (v === 0) continue;
-        const frac = v / total;
-        const len = frac * circumference;
-        circles += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + colors[key] +
-          '" stroke-width="' + sw + '" stroke-dasharray="' + len + ' ' + circumference +
-          '" stroke-dashoffset="' + (-offset) + '" transform="rotate(-90 ' + cx + ' ' + cy + ')">' +
-          "<title>" + key + ": " + v + " (" + (frac * 100).toFixed(0) + "%)</title></circle>";
-        offset += len;
-      }
-    }
-
-    const svg = '<svg viewBox="0 0 168 168" width="168" height="168">' + circles +
-      '<text x="' + cx + '" y="' + (cy - 4) + '" text-anchor="middle" class="donut-total-label" fill="' + cssVar("--text") + '">' + total + '</text>' +
-      '<text x="' + cx + '" y="' + (cy + 18) + '" text-anchor="middle" class="donut-total-sub" fill="' + cssVar("--text-muted") + '">FINDINGS</text>' +
-      '</svg>';
-
-    let legend = '<ul class="legend">';
+    let html = '<div class="severity-bars">';
     for (const key of order) {
       const v = bySeverity[key] || 0;
-      const pctVal = total ? Math.round((v / total) * 100) : 0;
-      legend += '<li><span class="legend-dot" style="background:' + colors[key] + '"></span>' +
-        '<span class="legend-label">' + key + '</span>' +
-        '<span class="legend-value">' + v + " (" + pctVal + "%)</span></li>";
-    }
-    legend += "</ul>";
-
-    return '<div class="donut-wrap">' + svg + legend + "</div>";
-  }
-
-  function gaugeSvg(value, color) {
-    const r = 44, cx = 52, cy = 52, sw = 10;
-    const circumference = 2 * Math.PI * r;
-    const len = value * circumference;
-    return '<svg viewBox="0 0 104 104" width="104" height="104">' +
-      '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + cssVar("--bg-sunken") + '" stroke-width="' + sw + '"/>' +
-      '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="' + sw +
-      '" stroke-linecap="round" stroke-dasharray="' + len + " " + circumference +
-      '" transform="rotate(-90 ' + cx + " " + cy + ')"/>' +
-      "</svg>";
-  }
-
-  function gaugesRowHtml(o) {
-    const items = [
-      { label: "Precision", value: o.precision, color: cssVar("--accent") },
-      { label: "Recall", value: o.recall, color: cssVar("--pastel-mint-text") },
-      { label: "F1", value: o.f1, color: cssVar("--pastel-purple-text") },
-    ];
-    let html = '<div class="gauges-row">';
-    for (const it of items) {
-      html += '<div class="gauge">' +
-        '<div style="position:relative">' + gaugeSvg(it.value, it.color) +
-        '<div class="gauge-value" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">' +
-        pct(it.value) + "</div></div>" +
-        '<div class="gauge-label">' + it.label + "</div></div>";
+      const widthPct = v === 0 ? 0 : Math.max(3, (v / max) * 100);
+      html += '<div class="severity-bar-row">' +
+        '<span class="severity-bar-label">' + key.charAt(0).toUpperCase() + key.slice(1) + "</span>" +
+        '<span class="severity-bar-track"><span class="severity-bar-fill" style="width:' + widthPct + "%;background:" + colors[key] + '"></span></span>' +
+        '<span class="severity-bar-count">' + v + "</span></div>";
     }
     html += "</div>";
     return html;
   }
 
-  function barsHtml(perRule) {
-    const maxCount = Math.max(1, ...perRule.flatMap((r) => [r.tp, r.fp, r.fn]));
-
-    let html = '<div class="bar-legend">' +
-      '<span class="bar-legend-item"><span class="bar-legend-dot" style="background:' + cssVar("--positive") + '"></span>True positive</span>' +
-      '<span class="bar-legend-item"><span class="bar-legend-dot" style="background:' + cssVar("--critical") + '"></span>False positive</span>' +
-      '<span class="bar-legend-item"><span class="bar-legend-dot" style="background:' + cssVar("--medium") + '"></span>False negative</span>' +
-      "</div>";
-
-    html += '<div class="rule-cards">';
+  function ruleTableHtml(perRule) {
+    let html = '<table class="rule-table"><thead><tr>' +
+      "<th>Rule</th><th>TP</th><th>FP</th><th>FN</th><th>Precision</th><th>Recall</th>" +
+      "</tr></thead><tbody>";
     for (const r of perRule) {
-      html += '<div class="rule-card"><div class="rule-card-title">' + r.rule.replace(/_/g, " ") + '</div><div class="bar-group">';
-      html += barLine("TP", r.tp, maxCount, "tp");
-      html += barLine("FP", r.fp, maxCount, "fp");
-      html += barLine("FN", r.fn, maxCount, "fn");
-      html += "</div></div>";
+      const imperfect = r.fp > 0 || r.fn > 0;
+      html += '<tr class="' + (imperfect ? "imperfect" : "") + '">' +
+        '<td class="rule-cell">' + r.rule.replace(/_/g, " ") + "</td>" +
+        "<td>" + r.tp + "</td>" +
+        "<td>" + r.fp + "</td>" +
+        "<td>" + r.fn + "</td>" +
+        '<td><span class="perf-cell"><span class="perf-dot' + (imperfect ? " imperfect" : "") + '"></span>' + pct(r.precision) + "</span></td>" +
+        "<td>" + pct(r.recall) + "</td>" +
+        "</tr>";
     }
-    html += "</div>";
+    html += "</tbody></table>";
     return html;
-  }
-
-  function barLine(label, value, maxCount, cls) {
-    const widthPct = Math.max(2, (value / maxCount) * 100);
-    return '<div class="bar-line"><span class="bar-line-tag">' + label + '</span>' +
-      '<span class="bar-track"><span class="bar-fill ' + cls + '" style="width:' + widthPct + '%"></span></span>' +
-      '<span class="bar-line-count">' + value + "</span></div>";
   }
 
   function renderMetrics(data) {
     const o = data.overall;
+    const totalTp = data.per_rule.reduce((a, r) => a + r.tp, 0);
+    const totalFp = data.per_rule.reduce((a, r) => a + r.fp, 0);
+    const totalFn = data.per_rule.reduce((a, r) => a + r.fn, 0);
+
     let html = "";
 
-    html += '<div class="charts-row">';
-    html += '<div class="chart-card"><h2>Findings by severity</h2>' + donutChartHtml(data.findings_by_severity || {}) + "</div>";
-    html += '<div class="chart-card"><h2>Precision · recall · F1</h2>' + gaugesRowHtml(o) + "</div>";
-    html += "</div>";
+    html += '<div class="metrics-scope">Held-out evaluation set &middot; ' + data.fixture_count + " fixtures</div>";
 
-    html += '<div class="chart-card"><h2>Per-rule breakdown</h2>' + barsHtml(data.per_rule) + "</div>";
+    html += '<div class="metrics-section">' + metricHeroRowHtml(o) + "</div>";
 
-    html += '<div class="metrics-grid">';
-    html += statTile("Precision", pct(o.precision));
-    html += statTile("Recall", pct(o.recall));
-    html += statTile("F1", pct(o.f1));
-    html += statTile("Held-out fixtures", data.fixture_count);
-    html += statTile("Estimated value saved", "$" + Math.round(data.cost.net_savings_usd).toLocaleString());
-    html += "</div>";
+    html += '<div class="metrics-section"><div class="section-title">Findings by severity</div>' +
+      severityBarsHtml(data.findings_by_severity || {}) + "</div>";
 
-    html += "<table class=\"metrics-table\"><thead><tr>" +
-      "<th>Rule</th><th>TP</th><th>FP</th><th>FN</th><th>Precision</th><th>Recall</th><th>F1</th>" +
-      "</tr></thead><tbody>";
-    for (const r of data.per_rule) {
-      html += "<tr>" +
-        "<td>" + r.rule.replace(/_/g, " ") + "</td>" +
-        "<td>" + r.tp + "</td>" +
-        "<td>" + r.fp + "</td>" +
-        "<td>" + r.fn + "</td>" +
-        "<td>" + pct(r.precision) + "</td>" +
-        "<td>" + pct(r.recall) + "</td>" +
-        "<td>" + pct(r.f1) + "</td>" +
-        "</tr>";
-    }
-    html += "</tbody></table>";
+    html += '<div class="metrics-section"><div class="section-title">Per-rule breakdown</div>' +
+      ruleTableHtml(data.per_rule) + "</div>";
 
-    html += '<div class="cost-note">' +
-      "Cost model: each false positive is costed at $" + data.cost.false_positive_cost_usd +
-      " (assumed developer time to triage and dismiss it), each false negative at $" +
-      data.cost.false_negative_cost_usd + " (assumed downstream fraud loss from an unnoticed bug). " +
-      "Both are stated placeholder assumptions, not measured figures. Across " + data.fixture_count +
-      " held-out fixtures, the tool's net estimated value versus catching nothing is $" +
-      Math.round(data.cost.net_savings_usd).toLocaleString() + "." +
-      "</div>";
+    html += '<div class="metrics-section"><div class="section-title">Evaluation methodology</div>' +
+      '<div class="methodology-box"><p>Results are calculated against a held-out fixture set that was not used ' +
+      "to tune the detection rules. This distinction matters: a scanner tuned against its own test cases can look " +
+      "far more accurate than it actually is on code it has never seen.</p>" +
+      '<div class="fact-list">' +
+      factItem(data.fixture_count, "Fixtures") +
+      factItem(totalTp, "True positives") +
+      factItem(totalFp, "False positives") +
+      factItem(totalFn, "False negatives") +
+      "</div></div></div>";
+
+    html += '<div class="metrics-section cost-block">' +
+      '<div class="cost-label">Illustrative cost model &middot; estimate, not a measured result</div>' +
+      '<div class="cost-value">$' + Math.round(data.cost.net_savings_usd).toLocaleString() + "</div>" +
+      '<div class="cost-caption">Estimated avoided review and exposure cost versus catching nothing, under the assumptions below.</div>' +
+      '<div class="cost-assumptions">' +
+      "$" + data.cost.false_positive_cost_usd + " assumed per false positive (developer time to triage and dismiss it) &middot; " +
+      "$" + data.cost.false_negative_cost_usd + " assumed per false negative (downstream fraud exposure from an unnoticed bug). " +
+      "Both figures are stated assumptions, not measured business results." +
+      "</div></div>";
 
     metricsContent.innerHTML = html;
   }
 
-  function statTile(label, value) {
-    return '<div class="stat-tile"><div class="stat-label">' + label +
-      '</div><div class="stat-value">' + value + "</div></div>";
+  function factItem(value, label) {
+    return '<div class="fact-item"><div class="fact-value">' + value + '</div><div class="fact-label">' + label + "</div></div>";
   }
 
   const themeToggle = document.getElementById("theme-toggle");
