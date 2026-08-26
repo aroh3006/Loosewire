@@ -202,8 +202,10 @@
     findingList.innerHTML = currentFindings.map((f, i) =>
       '<button class="finding-row' + (i === selectedIndex ? " selected" : "") + '" data-index="' + i + '">' +
       '<div class="finding-row-top"><span class="severity-mark" style="background:' + cssVar("--" + f.severity) + '"></span>' +
-      '<span class="finding-row-rule">' + f.rule.replace(/_/g, " ") + "</span></div>" +
-      '<div class="finding-row-loc">' + escapeHtml(f.file) + ":" + f.line + "</div>" +
+      '<span class="finding-row-sev" style="color:' + cssVar("--" + f.severity) + '">' + f.severity + "</span></div>" +
+      '<div class="finding-row-rule">' + f.rule.replace(/_/g, " ") + "</div>" +
+      '<div class="finding-row-meta"><span class="finding-row-loc">' + escapeHtml(f.file) + ":" + f.line + "</span>" +
+      '<span class="finding-row-conf">' + f.confidence + "</span></div>" +
       "</button>"
     ).join("");
 
@@ -217,9 +219,13 @@
     });
   }
 
+  const findingDetail = document.getElementById("finding-detail");
+
   function renderFindingDetail() {
     const f = currentFindings[selectedIndex];
     if (!f) return;
+
+    findingDetail.style.borderTopColor = cssVar("--" + f.severity);
 
     findingDetailContent.innerHTML =
       '<div class="detail-severity-row"><span class="severity-tag ' + f.severity + '">' + f.severity + "</span>" +
@@ -261,57 +267,56 @@
     }
   }
 
-  function perfScaleRowsHtml(o) {
+  function heroMetricsHtml(o) {
     const items = [
-      { label: "Precision", value: o.precision },
-      { label: "Recall", value: o.recall },
-      { label: "F1", value: o.f1 },
+      { label: "Precision", value: o.precision, color: cssVar("--blue") },
+      { label: "Recall", value: o.recall, color: cssVar("--purple") },
+      { label: "F1 score", value: o.f1, color: cssVar("--cyan") },
     ];
-    let html = '<div class="perf-scale-rows">';
+    let html = '<div class="hero-metrics">';
     for (const it of items) {
-      html += '<div class="perf-scale-row">' +
-        '<span class="perf-scale-label">' + it.label + "</span>" +
-        '<span class="perf-scale-value tabular">' + pct(it.value) + "</span>" +
-        '<span class="perf-scale-track"><span class="perf-scale-fill" style="width:' + (it.value * 100) + '%"></span>' +
-        '<span class="perf-scale-dot" style="left:' + (it.value * 100) + '%"></span></span>' +
+      html += '<div><div class="hero-metric-value tabular" style="color:' + it.color + '">' + pct(it.value) + "</div>" +
+        '<div class="hero-metric-label">' + it.label + "</div></div>";
+    }
+    html += "</div>";
+    return html;
+  }
+
+  function barChartHtml(o) {
+    const items = [
+      { label: "Precision", value: o.precision, color: cssVar("--blue") },
+      { label: "Recall", value: o.recall, color: cssVar("--purple") },
+      { label: "F1", value: o.f1, color: cssVar("--cyan") },
+    ];
+    let html = '<div class="bar-chart">';
+    for (const it of items) {
+      html += '<div class="bar-chart-col">' +
+        '<div class="bar-chart-track"><div class="bar-chart-bar" style="height:' + (it.value * 100) + "%;background:" + it.color + '" title="' +
+        it.label + ": " + pct(it.value) + '"></div></div>' +
+        '<div class="bar-chart-value">' + pct(it.value) + "</div>" +
+        '<div class="bar-chart-label">' + it.label + "</div></div>";
+    }
+    html += "</div>";
+    return html;
+  }
+
+  function ruleBarsHtml(perRule) {
+    let html = '<div class="rule-bars">';
+    for (const r of perRule) {
+      html += '<div class="rule-bars-item" style="border-left-color:' + (r.fp > 0 || r.fn > 0 ? cssVar("--high") : cssVar("--positive")) + '">' +
+        '<div class="rule-bars-name">' + r.rule.replace(/_/g, " ") + "</div>" +
+        ruleBarRow("Precision", r.precision, cssVar("--blue")) +
+        ruleBarRow("Recall", r.recall, cssVar("--purple")) +
         "</div>";
     }
     html += "</div>";
     return html;
   }
 
-  function profilePlotHtml(o) {
-    const items = [
-      { label: "Precision", value: o.precision, color: cssVar("--info") },
-      { label: "Recall", value: o.recall, color: cssVar("--positive") },
-      { label: "F1", value: o.f1, color: cssVar("--text") },
-    ];
-
-    // Assign each label a vertical tier so labels for close-together values
-    // (F1 always sits between precision and recall) don't collide. Sorting
-    // by value and alternating tiers guarantees neighbors never share one,
-    // with no risk of the assignment never settling.
-    const sorted = items.map((it, i) => ({ ...it, i })).sort((a, b) => a.value - b.value);
-    sorted.forEach((it, rank) => {
-      items[it.i].tier = rank % 2;
-    });
-
-    let nodes = "";
-    let labels = "";
-    for (const it of items) {
-      const leftPct = it.value * 100;
-      const labelTop = it.tier * 32;
-      const connectorHeight = 10 + it.tier * 32;
-      nodes += '<span class="profile-node" style="left:' + leftPct + "%;background:" + it.color + '"></span>' +
-        '<span class="profile-connector" style="left:' + leftPct + "%;height:" + connectorHeight + "px;background:" + it.color + '"></span>';
-      labels += '<span class="profile-label" style="left:' + leftPct + "%;top:" + labelTop + 'px">' + it.label +
-        '<span class="val">' + pct(it.value) + "</span></span>";
-    }
-    return '<div class="profile-plot">' +
-      '<div class="profile-axis-line">' + nodes + "</div>" +
-      '<div class="profile-labels">' + labels + "</div>" +
-      '<div class="profile-scale-caption"><span>0%</span><span>100%</span></div>' +
-      "</div>";
+  function ruleBarRow(label, value, color) {
+    return '<div class="rule-bars-row"><span class="rule-bars-label">' + label + '</span>' +
+      '<span class="rule-bars-track"><span class="rule-bars-fill" style="width:' + (value * 100) + "%;background:" + color + '"></span></span>' +
+      '<span class="rule-bars-value">' + pct(value) + "</span></div>";
   }
 
   function ruleMatrixHtml(perRule) {
@@ -343,18 +348,18 @@
 
     let html = "";
 
-    html += '<div class="metrics-section">' + perfScaleRowsHtml(o) + "</div>";
+    html += '<div class="metrics-section">' + heroMetricsHtml(o) + "</div>";
 
-    html += '<hr class="rule"><div class="metrics-section"><div class="section-label">Detection profile</div>' +
-      profilePlotHtml(o) + "</div>";
+    html += '<div class="metrics-section"><div class="section-title">Performance chart</div>' +
+      barChartHtml(o) + "</div>";
 
-    html += '<hr class="rule"><div class="metrics-section"><div class="section-label">Finding distribution</div>' +
+    html += '<hr class="rule"><div class="metrics-section"><div class="section-title">Finding distribution</div>' +
       '<div class="severity-dist">' + severityDistHtml(data.findings_by_severity || {}) + "</div></div>";
 
-    html += '<hr class="rule"><div class="metrics-section"><div class="section-label">Rule performance</div>' +
-      ruleMatrixHtml(data.per_rule) + "</div>";
+    html += '<hr class="rule"><div class="metrics-section"><div class="section-title">Rule performance</div>' +
+      ruleMatrixHtml(data.per_rule) + ruleBarsHtml(data.per_rule) + "</div>";
 
-    html += '<hr class="rule"><div class="metrics-section"><div class="section-label">Evaluation methodology</div>' +
+    html += '<hr class="rule"><div class="metrics-section"><div class="section-title">Evaluation methodology</div>' +
       '<div class="methodology-row"><p class="methodology-text">Results are calculated against a held-out fixture ' +
       "set that was not used to tune the detection rules. This distinction matters: a scanner tuned against its own " +
       "test cases can look far more accurate than it actually is on code it has never seen.</p>" +
@@ -365,7 +370,7 @@
       factRow(totalFn, "False negatives") +
       "</div></div></div>";
 
-    html += '<hr class="rule"><div class="metrics-section"><div class="section-label">Estimated cost model</div>' +
+    html += '<hr class="rule"><div class="metrics-section"><div class="section-title">Estimated cost model</div>' +
       '<div class="cost-row"><div class="cost-value tabular">$' + Math.round(data.cost.net_savings_usd).toLocaleString() + "</div>" +
       '<div class="cost-caption">estimated avoided review and exposure cost versus catching nothing</div></div>' +
       '<div class="cost-assumptions">' +

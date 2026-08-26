@@ -14,17 +14,19 @@
     <hr class="sidebar-rule">
 
     <nav class="sidebar-nav" id="nav-tabs">
-      <button class="nav-item active" data-view="upload">Scan</button>
-      <button class="nav-item" data-view="findings">Findings</button>
-      <button class="nav-item" data-view="metrics">Metrics</button>
+      <button class="nav-item active" data-view="upload">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16l-4-4-4 4"/><path d="M12 12v9"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+        <span>Scan</span>
+      </button>
+      <button class="nav-item" data-view="findings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>Findings</span>
+      </button>
+      <button class="nav-item" data-view="metrics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Metrics</span>
+      </button>
     </nav>
-
-    <div class="sidebar-bottom">
-      <div class="status-line">
-        <span class="status-dot"></span>
-        <span>Scanner ready</span>
-      </div>
-    </div>
   </aside>
 
   <div class="main">
@@ -38,55 +40,50 @@
           payment flow into an exploitable one.
         </p>
 
-        <hr class="rule">
-
-        <div class="scan-row">
-          <div class="scan-row-label">Project</div>
-          <div class="scan-row-body">
-            <div class="drop-target" id="dropzone">
-              <input type="file" id="file-input" accept=".zip,.apk" hidden>
-              <div>
-                <div class="drop-target-text">Drop a ZIP or APK here, or choose a file</div>
-                <div class="drop-target-hint">50 MB maximum</div>
-              </div>
-              <button class="primary" type="button" id="choose-file-btn">Choose file</button>
-            </div>
-            <div class="upload-status" id="upload-status"></div>
-            <div id="scan-stages-wrap"></div>
+        <div class="drop-target" id="dropzone">
+          <input type="file" id="file-input" accept=".zip,.apk" hidden>
+          <div class="drop-target-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16l-4-4-4 4"/><path d="M12 12v21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
           </div>
+          <div class="drop-target-title">Drop your project here</div>
+          <div class="drop-target-hint">ZIP or APK &middot; Maximum 50 MB</div>
+          <button class="primary" type="button" id="choose-file-btn">Choose file</button>
         </div>
 
-        <hr class="rule">
+        <div class="upload-status" id="upload-status"></div>
+        <div id="scan-stages-wrap"></div>
 
-        <div class="scan-row">
-          <div class="scan-row-label">Analysis</div>
-          <div class="scan-row-body">
-            <div class="check-rows">
-              <div class="check-row">
-                <span class="check-status"></span>
-                <span class="check-row-name">Signature verification</span>
-                <span class="check-row-desc">Order completion paths must verify a signature before trusting a payment as final.</span>
-              </div>
-              <div class="check-row">
-                <span class="check-status"></span>
-                <span class="check-row-name">Webhook verification</span>
-                <span class="check-row-desc">Callback endpoints must check a signature header before acting on the payload.</span>
-              </div>
-              <div class="check-row">
-                <span class="check-status"></span>
-                <span class="check-row-name">Amount integrity</span>
-                <span class="check-row-desc">Confirmed amounts must be compared against the amount stored at order creation.</span>
-              </div>
-              <div class="check-row">
-                <span class="check-status"></span>
-                <span class="check-row-name">Secret exposure</span>
-                <span class="check-row-desc">Secret-looking values hardcoded into anything shipped to a client or bundled into an app.</span>
-              </div>
-            </div>
+        <div class="section-title">What we check</div>
+        <div class="analysis-grid">
+          <div class="analysis-cell accent-blue">
+            <span class="analysis-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 2.5 19.5 5.5V11C19.5 16 16.2 19.8 12 21.5 7.8 19.8 4.5 16 4.5 11V5.5Z"/></svg>
+            </span>
+            <div class="analysis-name">Signature verification</div>
+            <div class="analysis-desc">Order completion must verify a signature before trusting a payment as final.</div>
+          </div>
+          <div class="analysis-cell accent-purple">
+            <span class="analysis-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l8-5 8 5v8l-8 5-8-5z"/><path d="M4 8l8 5 8-5"/><path d="M12 13v8"/></svg>
+            </span>
+            <div class="analysis-name">Webhook verification</div>
+            <div class="analysis-desc">Callback endpoints must check a signature header before acting on the payload.</div>
+          </div>
+          <div class="analysis-cell accent-cyan">
+            <span class="analysis-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5c0-1.4 1.1-2.5 2.5-2.5s2.5 1.1 2.5 2.5c0 1.1-1.1 1.8-2 2.3-.7.4-1 .8-1 1.7"/><line x1="12" y1="16.5" x2="12" y2="16.51"/></svg>
+            </span>
+            <div class="analysis-name">Amount integrity</div>
+            <div class="analysis-desc">Confirmed amounts must match the amount stored at order creation.</div>
+          </div>
+          <div class="analysis-cell accent-orange">
+            <span class="analysis-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="1.5"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            </span>
+            <div class="analysis-name">Secret exposure</div>
+            <div class="analysis-desc">Secret-looking values hardcoded into anything shipped to a client or app.</div>
           </div>
         </div>
-
-        <hr class="rule">
 
         <div class="scope-row">
           <span class="scope-item">Local static analysis</span>
