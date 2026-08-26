@@ -490,6 +490,55 @@ button.outline:hover { border-color: var(--accent); color: var(--accent); }
   .check-list { grid-template-columns: 1fr; }
 }
 
+@media (max-width: 680px) {
+  .app-shell { flex-direction: column; }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 14px;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+
+  .sidebar-brand { padding: 0; margin-right: auto; }
+
+  .sidebar-nav { flex-direction: row; gap: 2px; }
+
+  .nav-item {
+    border-left: none;
+    border-bottom: 2px solid transparent;
+    padding: 8px 9px;
+  }
+
+  .nav-item.active { border-left: none; border-bottom-color: var(--sidebar-accent); }
+
+  .nav-item span:last-child { display: none; }
+
+  .sidebar-bottom {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    flex-direction: row;
+    gap: 2px;
+  }
+
+  .scanner-status, .env-tag { display: none; }
+
+  .theme-toggle span:last-child { display: none; }
+
+  .content { padding: 24px 16px 56px; }
+
+  .metric-hero-row { gap: 28px; }
+  .metric-hero-value { font-size: 36px; }
+
+  .fact-list { gap: 24px; }
+}
+
 /* ---------- findings ---------- */
 
 .findings-header {
