@@ -199,6 +199,8 @@
         " detected across " + body.files_scanned + " file" + (body.files_scanned === 1 ? "" : "s") + ".",
         "success"
       );
+      lastScanFileName = file.name;
+      lastScanDate = new Date();
       renderFindings(body);
       showView("findings");
       try {
@@ -227,6 +229,9 @@
   let currentFindings = [];
   let selectedIndex = 0;
   let dismissedIndices = new Set();
+  let lastScanFileName = "";
+  let lastScanDate = null;
+  let lastScanSummary = null;
 
   const WHY_IT_MATTERS = {
     missing_signature_verification:
@@ -241,13 +246,15 @@
 
   function renderFindings(report) {
     currentFindings = report.findings;
+    lastScanSummary = report;
     selectedIndex = 0;
     dismissedIndices = new Set();
 
     if (!report.findings.length) {
       findingsTitle.textContent = "0 Findings Detected";
       findingsCount.innerHTML = '<span class="meta-item">' + report.files_scanned + ' files inspected</span>' +
-        '<span class="meta-separator">/</span><span class="meta-item status-clean">No vulnerabilities found</span>';
+        '<span class="meta-separator">/</span><span class="meta-item status-clean">No vulnerabilities found</span>' +
+        '<span class="meta-separator">/</span>' + downloadButtonHtml();
       findingsEmpty.style.display = "block";
       findingsEmpty.innerHTML = '<div class="empty-state-inner">' +
         '<div class="empty-state-label">SCAN COMPLETE · CLEAN</div>' +
@@ -266,6 +273,7 @@
     if (report.frameworks_detected && report.frameworks_detected.length) {
       metaHtml += '<span class="meta-separator">/</span><span class="meta-item">Framework: ' + escapeHtml(report.frameworks_detected.join(", ")) + '</span>';
     }
+    metaHtml += '<span class="meta-separator">/</span>' + downloadButtonHtml();
     findingsCount.innerHTML = metaHtml;
 
     findingsEmpty.style.display = "none";
@@ -401,6 +409,160 @@
     renderFindingList();
     renderFindingDetail();
     renderSessionSummary();
+  });
+
+  /* ---------- pdf report ---------- */
+
+  function downloadButtonHtml() {
+    return '<button type="button" class="btn-back" data-download-report style="margin-bottom:0;">Download report</button>';
+  }
+
+  function pdfDateStamp(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return y + "-" + m + "-" + d;
+  }
+
+  function pdfFileName() {
+    const base = (lastScanFileName || "loosewire-scan").replace(/\.(zip|apk)$/i, "");
+    const safeBase = base.replace(/[^a-zA-Z0-9._-]+/g, "-");
+    const stamp = pdfDateStamp(lastScanDate || new Date());
+    return safeBase + "-" + stamp + ".pdf";
+  }
+
+  function generatePdfReport() {
+    if (!lastScanSummary || !window.jspdf) {
+      alert("The PDF library did not load. Check your connection and try again.");
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 48;
+    const contentWidth = pageWidth - margin * 2;
+    let y = margin;
+
+    function ensureSpace(neededHeight) {
+      if (y + neededHeight > pageHeight - margin) {
+        doc.addPage();
+        y = margin;
+      }
+    }
+
+    function writeLines(text, x, fontSize, lineHeight, color) {
+      doc.setFontSize(fontSize);
+      doc.setTextColor(color || "#1a1a1a");
+      const lines = doc.splitTextToSize(text, contentWidth - (x - margin));
+      lines.forEach((line) => {
+        ensureSpace(lineHeight);
+        doc.text(line, x, y);
+        y += lineHeight;
+      });
+    }
+
+    // title and scan summary
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.setTextColor("#111111");
+    doc.text("Loosewire scan report", margin, y);
+    y += 26;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.setTextColor("#444444");
+    const projectName = lastScanFileName || "unknown project";
+    const scanDate = (lastScanDate || new Date()).toLocaleString();
+    doc.text("Project: " + projectName, margin, y);
+    y += 16;
+    doc.text("Scan date: " + scanDate, margin, y);
+    y += 16;
+    doc.text("Files scanned: " + lastScanSummary.files_scanned, margin, y);
+    y += 16;
+    if (lastScanSummary.frameworks_detected && lastScanSummary.frameworks_detected.length) {
+      doc.text("Frameworks detected: " + lastScanSummary.frameworks_detected.join(", "), margin, y);
+      y += 16;
+    }
+    doc.text("Total findings: " + currentFindings.length, margin, y);
+    y += 24;
+
+    doc.setDrawColor("#cccccc");
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 24;
+
+    const activeFindings = currentFindings.filter((f, i) => !dismissedIndices.has(i));
+    const dismissedCount = currentFindings.length - activeFindings.length;
+
+    if (dismissedCount > 0) {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(10);
+      doc.setTextColor("#666666");
+      doc.text(
+        dismissedCount + " finding" + (dismissedCount === 1 ? " was" : "s were") +
+        " marked not applicable during this session and left out of the list below.",
+        margin,
+        y
+      );
+      y += 22;
+    }
+
+    if (!activeFindings.length) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      doc.setTextColor("#333333");
+      doc.text("No findings to report.", margin, y);
+    }
+
+    activeFindings.forEach((f, i) => {
+      ensureSpace(70);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor("#111111");
+      const heading = (i + 1) + ". [" + f.severity.toUpperCase() + "] " + f.rule.replace(/_/g, " ");
+      doc.text(heading, margin, y);
+      y += 18;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor("#555555");
+      doc.text("Confidence: " + f.confidence + "    Location: " + f.file + ":" + f.line, margin, y);
+      y += 16;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor("#333333");
+      doc.text("Description", margin, y);
+      y += 13;
+      doc.setFont("helvetica", "normal");
+      writeLines(f.description, margin, 10, 13, "#333333");
+      y += 4;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor("#333333");
+      doc.text("Fix", margin, y);
+      y += 13;
+      doc.setFont("helvetica", "normal");
+      writeLines(f.fix, margin, 10, 13, "#333333");
+
+      y += 14;
+      if (i < activeFindings.length - 1) {
+        ensureSpace(10);
+        doc.setDrawColor("#eeeeee");
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 18;
+      }
+    });
+
+    doc.save(pdfFileName());
+  }
+
+  document.addEventListener("click", (e) => {
+    const dlBtn = e.target.closest("[data-download-report]");
+    if (!dlBtn) return;
+    generatePdfReport();
   });
 
   /* ---------- metrics ---------- */
