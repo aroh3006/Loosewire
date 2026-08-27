@@ -765,6 +765,10 @@ html, body {
   border-left-color: var(--text-primary);
 }
 
+.finding-item.dismissed {
+  opacity: 0.55;
+}
+
 .finding-item-top {
   display: flex;
   align-items: center;

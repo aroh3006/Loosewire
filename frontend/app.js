@@ -225,6 +225,7 @@
 
   let currentFindings = [];
   let selectedIndex = 0;
+  let dismissedIndices = new Set();
 
   const WHY_IT_MATTERS = {
     missing_signature_verification:
@@ -240,6 +241,7 @@
   function renderFindings(report) {
     currentFindings = report.findings;
     selectedIndex = 0;
+    dismissedIndices = new Set();
 
     if (!report.findings.length) {
       findingsTitle.textContent = "0 Findings Detected";
@@ -280,12 +282,17 @@
   function renderFindingList() {
     findingList.innerHTML = currentFindings.map((f, i) => {
       const isSelected = i === selectedIndex;
+      const isDismissed = dismissedIndices.has(i);
       const formattedRule = f.rule.replace(/_/g, " ");
+      const rowClass = "finding-item" + (isSelected ? " selected" : "") + (isDismissed ? " dismissed" : "");
+      const statusPill = isDismissed
+        ? '<span class="confidence-pill">Not applicable</span>'
+        : '<span class="confidence-pill">' + f.confidence + '</span>';
 
-      return '<div class="finding-item ' + (isSelected ? "selected" : "") + '" data-index="' + i + '">' +
+      return '<div class="' + rowClass + '" data-index="' + i + '">' +
         '<div class="finding-item-top">' +
           '<span class="severity-pill ' + f.severity + '">' + f.severity + '</span>' +
-          '<span class="confidence-pill">' + f.confidence + '</span>' +
+          statusPill +
         '</div>' +
         '<div class="finding-item-title">' + formattedRule + '</div>' +
         '<div class="finding-item-loc monospace">' + escapeHtml(f.file) + '<span class="line-num">:' + f.line + '</span></div>' +
@@ -308,6 +315,10 @@
     const f = currentFindings[selectedIndex];
     if (!f) return;
 
+    const isDismissed = dismissedIndices.has(selectedIndex);
+    const toggleLabel = isDismissed ? "Mark as applicable" : "Mark as not applicable";
+    const dismissedTag = isDismissed ? '<span class="confidence-pill">NOT APPLICABLE</span>' : "";
+
     const formattedRule = f.rule.replace(/_/g, " ");
     const whyExpl = WHY_IT_MATTERS[f.rule] ||
       "This pattern represents an insecure payment implementation that deviates from secure payment gateway integration specifications. Review the affected code path.";
@@ -318,9 +329,11 @@
           '<span class="severity-pill ' + f.severity + '">' + f.severity + '</span>' +
           '<span class="confidence-tag">' + f.confidence.toUpperCase() + ' CONFIDENCE</span>' +
           '<span class="rule-key monospace">' + f.rule + '</span>' +
+          dismissedTag +
         '</div>' +
         '<h2 class="detail-headline">' + escapeHtml(formattedRule) + '</h2>' +
         '<p class="detail-description">' + escapeHtml(f.description) + '</p>' +
+        '<button type="button" class="btn-back" data-toggle-na style="margin-top:12px;margin-bottom:0;">' + toggleLabel + '</button>' +
       '</div>' +
 
       '<div class="detail-section">' +
@@ -356,6 +369,18 @@
   }
 
   findingBack.addEventListener("click", () => investigation.classList.remove("show-detail"));
+
+  document.addEventListener("click", (e) => {
+    const naBtn = e.target.closest("[data-toggle-na]");
+    if (!naBtn) return;
+    if (dismissedIndices.has(selectedIndex)) {
+      dismissedIndices.delete(selectedIndex);
+    } else {
+      dismissedIndices.add(selectedIndex);
+    }
+    renderFindingList();
+    renderFindingDetail();
+  });
 
   /* ---------- metrics ---------- */
 
