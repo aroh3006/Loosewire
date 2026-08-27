@@ -69,6 +69,29 @@ with no prior context.
 
 The interface is dark only. There is no light mode and no theme toggle.
 
+## Working with findings
+
+On the Findings view, each finding can be marked not applicable. It can
+also be marked back as applicable again. This is a session only view. It
+lives in the browser and resets the moment you refresh the page or run a
+new scan.
+
+Marking a finding not applicable dims it in the list. It also recomputes
+the severity summary above the list right away. The counts there only
+reflect the findings you still consider active. This working view never
+touches the backend and never changes the precision, recall, and F1
+numbers on the Metrics page. Those numbers come only from the held-out
+fixture set and stay exactly as they are, no matter what you mark during
+a scan.
+
+The Findings view also has a Download report button. It builds a PDF
+entirely in the browser, with no backend involved, using a small
+client-side library loaded from a CDN. The PDF includes the project name,
+scan date, files scanned, frameworks detected, and every active finding
+with its severity, confidence, location, description, and fix. Findings
+marked not applicable are left out of the list, with a short note at the
+top of how many were excluded.
+
 ## Architecture
 
 A scan is a straight line from upload to report, with nothing kept
