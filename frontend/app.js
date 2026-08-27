@@ -73,6 +73,21 @@
 
   const SEVERITY_ORDER = ["critical", "high", "medium", "low"];
 
+  // Counts findings by severity, skipping any index marked as dismissed.
+  // This is the same logic as frontend/severity-summary.js. It is kept
+  // here too, inline, so app.js never depends on that file loading as a
+  // separate script tag in the browser. severity-summary.js still exists
+  // on its own for the plain node test in tests/frontend, which needs a
+  // requirable module rather than a browser global.
+  function computeActiveSeverityCounts(findings, dismissedIndices) {
+    const counts = { critical: 0, high: 0, medium: 0, low: 0 };
+    findings.forEach((f, i) => {
+      if (dismissedIndices.has(i)) return;
+      if (f.severity in counts) counts[f.severity]++;
+    });
+    return counts;
+  }
+
   function severityDistHtml(counts) {
     const max = Math.max(1, ...SEVERITY_ORDER.map((k) => counts[k] || 0));
 
