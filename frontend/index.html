@@ -1,131 +1,595 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Loosewire</title>
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loosewire</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-<div class="app-shell">
+  <div class="app-shell">
 
-  <aside class="sidebar">
-    <div class="wordmark">Loosewire</div>
-    <hr class="sidebar-rule">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="wordmark">Loosewire</div>
+      </div>
 
-    <nav class="sidebar-nav" id="nav-tabs">
-      <button class="nav-item active" data-view="upload">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16l-4-4-4 4"/><path d="M12 12v9"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
-        <span>Scan</span>
-      </button>
-      <button class="nav-item" data-view="findings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        <span>Findings</span>
-      </button>
-      <button class="nav-item" data-view="metrics">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        <span>Metrics</span>
-      </button>
-    </nav>
-  </aside>
-
-  <div class="main">
-    <main class="content">
-
-      <section id="view-upload" class="view active">
-        <span class="eyebrow">Scan</span>
-        <h1>Scan a payment integration.</h1>
-        <p class="muted">
-          Analyze a checkout integration for implementation mistakes that can turn a working
-          payment flow into an exploitable one.
-        </p>
-
-        <div class="drop-target" id="dropzone">
-          <input type="file" id="file-input" accept=".zip,.apk" hidden>
-          <div class="drop-target-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16l-4-4-4 4"/><path d="M12 12v21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
-          </div>
-          <div class="drop-target-title">Drop your project here</div>
-          <div class="drop-target-hint">ZIP or APK &middot; Maximum 50 MB</div>
-          <button class="primary" type="button" id="choose-file-btn">Choose file</button>
+      <nav class="sidebar-nav" id="nav-tabs">
+        <div class="sidebar-group">
+          <div class="sidebar-group-title">Features</div>
+          <button class="nav-item active" data-view="upload" id="nav-upload">
+            <span class="nav-index">01</span>
+            <span class="nav-label">Scan</span>
+          </button>
+          <button class="nav-item" data-view="findings" id="nav-findings">
+            <span class="nav-index">02</span>
+            <span class="nav-label">Findings</span>
+          </button>
         </div>
 
-        <div class="upload-status" id="upload-status"></div>
-        <div id="scan-stages-wrap"></div>
-
-        <div class="section-title">What we check</div>
-        <div class="analysis-grid">
-          <div class="analysis-cell accent-blue">
-            <span class="analysis-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 2.5 19.5 5.5V11C19.5 16 16.2 19.8 12 21.5 7.8 19.8 4.5 16 4.5 11V5.5Z"/></svg>
-            </span>
-            <div class="analysis-name">Signature verification</div>
-            <div class="analysis-desc">Order completion must verify a signature before trusting a payment as final.</div>
-          </div>
-          <div class="analysis-cell accent-purple">
-            <span class="analysis-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l8-5 8 5v8l-8 5-8-5z"/><path d="M4 8l8 5 8-5"/><path d="M12 13v8"/></svg>
-            </span>
-            <div class="analysis-name">Webhook verification</div>
-            <div class="analysis-desc">Callback endpoints must check a signature header before acting on the payload.</div>
-          </div>
-          <div class="analysis-cell accent-cyan">
-            <span class="analysis-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5c0-1.4 1.1-2.5 2.5-2.5s2.5 1.1 2.5 2.5c0 1.1-1.1 1.8-2 2.3-.7.4-1 .8-1 1.7"/><line x1="12" y1="16.5" x2="12" y2="16.51"/></svg>
-            </span>
-            <div class="analysis-name">Amount integrity</div>
-            <div class="analysis-desc">Confirmed amounts must match the amount stored at order creation.</div>
-          </div>
-          <div class="analysis-cell accent-orange">
-            <span class="analysis-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="1.5"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-            </span>
-            <div class="analysis-name">Secret exposure</div>
-            <div class="analysis-desc">Secret-looking values hardcoded into anything shipped to a client or app.</div>
-          </div>
+        <div class="sidebar-group">
+          <div class="sidebar-group-title">About</div>
+          <button class="nav-item" data-view="metrics" id="nav-metrics">
+            <span class="nav-index">03</span>
+            <span class="nav-label">Metrics</span>
+          </button>
+          <button class="nav-item" data-view="guide" id="nav-guide">
+            <span class="nav-index">04</span>
+            <span class="nav-label">Product Handbook</span>
+          </button>
         </div>
+      </nav>
+    </aside>
 
-        <div class="scope-row">
-          <span class="scope-item">Local static analysis</span>
-          <span class="scope-item">No external requests</span>
-          <span class="scope-item">Temporary processing</span>
-          <span class="scope-item">Test or authorized code only</span>
-        </div>
-      </section>
+    <div class="main">
+      <main class="content">
 
-      <section id="view-findings" class="view">
-        <span class="eyebrow">Findings</span>
-        <h1 id="findings-title">No scan yet</h1>
-        <div class="findings-count" id="findings-count"></div>
+        <!-- ================= 01 SCAN VIEW ================= -->
+        <section id="view-upload" class="view active">
+          <header class="view-header">
+            <div class="view-eyebrow">Project Analysis</div>
+            <h1 class="view-title">Scan payment integration</h1>
+            <p class="view-description">
+              Analyze an application package or source archive for implementation vulnerabilities
+              across checkout flow, signature verification and secret handling.
+            </p>
+          </header>
 
-        <div id="findings-empty" class="empty-state">
-          Run a scan from the Scan tab to populate this view.
-        </div>
+          <div class="editorial-divider"></div>
 
-        <div id="findings-body" style="display:none">
-          <div class="severity-dist" id="findings-severity-dist"></div>
-          <hr class="rule">
-          <div class="investigation" id="investigation">
-            <div class="finding-list" id="finding-list"></div>
-            <div class="finding-detail" id="finding-detail">
-              <button class="text-link finding-detail-back" id="finding-back">&larr; Findings</button>
-              <div id="finding-detail-content"></div>
+          <div class="scan-workspace">
+            <div class="scan-upload-col">
+              <div class="section-label">01 / SOURCE ARCHIVE</div>
+              <div class="drop-target" id="dropzone">
+                <input type="file" id="file-input" accept=".zip,.apk" hidden>
+                <div class="drop-target-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                </div>
+                <div class="drop-target-title">Drop project archive or APK</div>
+                <div class="drop-target-hint">ZIP or APK &middot; Maximum 50 MB</div>
+                <button class="btn-primary" type="button" id="choose-file-btn">Choose file</button>
+              </div>
+
+              <div class="upload-status" id="upload-status"></div>
+              <div id="scan-stages-wrap"></div>
+            </div>
+
+            <div class="scan-checks-col">
+              <div class="section-label">02 / DETECTION CHECKS</div>
+              <div class="analysis-grid">
+                <div class="analysis-cell">
+                  <div class="analysis-cell-head">
+                    <span class="analysis-num">01</span>
+                    <div class="analysis-name">Signature verification</div>
+                  </div>
+                  <div class="analysis-desc">Checks that payment completion verifies an HMAC signature on the server
+                    before marking an order as paid.</div>
+                </div>
+                <div class="analysis-cell">
+                  <div class="analysis-cell-head">
+                    <span class="analysis-num">02</span>
+                    <div class="analysis-name">Webhook verification</div>
+                  </div>
+                  <div class="analysis-desc">Checks that asynchronous webhook handlers verify the signature header
+                    before acting on the payload.</div>
+                </div>
+                <div class="analysis-cell">
+                  <div class="analysis-cell-head">
+                    <span class="analysis-num">03</span>
+                    <div class="analysis-name">Amount integrity</div>
+                  </div>
+                  <div class="analysis-desc">Checks that the confirmed payment amount matches the original order
+                    amount stored in the database.</div>
+                </div>
+                <div class="analysis-cell">
+                  <div class="analysis-cell-head">
+                    <span class="analysis-num">04</span>
+                    <div class="analysis-name">Secret exposure</div>
+                  </div>
+                  <div class="analysis-desc">Detects private API keys and secret tokens hardcoded in frontend scripts
+                    or mobile app packages.</div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section id="view-metrics" class="view">
-        <span class="eyebrow">Detection performance</span>
-        <h1>How well the scanner catches real mistakes.</h1>
-        <div class="metrics-scope" id="metrics-scope"></div>
+        <!-- ================= 02 FINDINGS VIEW ================= -->
+        <section id="view-findings" class="view">
+          <header class="view-header">
+            <div class="view-eyebrow">Security Inspection</div>
+            <h1 class="view-title" id="findings-title">Findings</h1>
+            <div class="findings-meta-bar" id="findings-count"></div>
+          </header>
 
-        <div id="metrics-content"></div>
-      </section>
+          <div id="findings-empty" class="empty-state">
+            <div class="empty-state-inner">
+              <div class="empty-state-label">NO ACTIVE SCAN</div>
+              <p>Upload a project archive (.zip) or Android package (.apk) from the Scan tab to run static analysis.</p>
+            </div>
+          </div>
 
-    </main>
+          <div id="findings-body" style="display:none">
+            <div class="editorial-divider"></div>
+
+            <div class="findings-overview-bar">
+              <div class="overview-section-title">SEVERITY DISTRIBUTION</div>
+              <div class="severity-dist" id="findings-severity-dist"></div>
+            </div>
+
+            <div class="editorial-divider"></div>
+
+            <div class="investigation" id="investigation">
+              <div class="finding-list-pane">
+                <div class="pane-header">
+                  <span class="pane-title">FLAGGED ISSUES</span>
+                </div>
+                <div class="finding-list" id="finding-list"></div>
+              </div>
+
+              <div class="finding-detail-pane" id="finding-detail">
+                <button class="btn-back finding-detail-back" id="finding-back">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                  </svg>
+                  <span>Back to list</span>
+                </button>
+                <div id="finding-detail-content"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= 03 METRICS VIEW ================= -->
+        <section id="view-metrics" class="view">
+          <header class="view-header">
+            <div class="view-eyebrow">Evaluation Report</div>
+            <h1 class="view-title">Detection performance</h1>
+            <div class="metrics-scope-bar" id="metrics-scope">Held-out evaluation · 19 fixtures</div>
+          </header>
+
+          <div class="editorial-divider"></div>
+
+          <!-- Dynamic Metrics Render Target (Ends clean with Metrics content only) -->
+          <div id="metrics-content">
+            <div class="loading-placeholder">Loading evaluation metrics…</div>
+          </div>
+        </section>
+
+        <!-- ================= 04 UNDERSTANDING LOOSEWIRE VIEW ================= -->
+        <section id="view-guide" class="view">
+          <header class="view-header">
+            <div class="view-eyebrow">Product Handbook</div>
+            <h1 class="view-title">Understanding Loosewire</h1>
+            <p class="view-description">
+              A comprehensive guide to payment integration security, detection mechanics,
+              how to interpret findings, evaluation methodology and the estimated value model.
+            </p>
+          </header>
+
+          <div class="editorial-divider"></div>
+
+          <article class="guide-container" id="product-guide">
+
+            <!-- Section 1: What is Loosewire -->
+            <section class="guide-section" id="section-what-is-loosewire">
+              <div class="guide-section-num">01</div>
+              <div class="guide-section-content">
+                <h2 class="guide-section-title">What is Loosewire?</h2>
+                <p class="guide-p">
+                  Loosewire is a specialized static analysis security scanner designed specifically for payment gateway integrations. It inspects application source archives (<code>.zip</code>) and compiled Android packages (<code>.apk</code>) to detect implementation flaws that could allow an attacker to bypass payment verification, manipulate transaction amounts or extract private merchant credentials.
+                </p>
+                <p class="guide-p">
+                  <strong>The crucial distinction:</strong> Loosewire is not a customer fraud-detection engine that evaluates whether a shopper or credit card is suspicious. Instead, it inspects the <em>merchant's application codebase</em> to ensure that backend handlers correctly verify cryptographic proofs, authenticate gateway callbacks and enforce transaction invariants before fulfilling orders.
+                </p>
+                <p class="guide-p">
+                  <strong>Scanner Evaluation vs. Current Scan:</strong> When you open Loosewire, you will see published evaluation benchmarks (88.9% Precision, 100% Recall, 94.1% F1). These numbers describe <em>Loosewire's own scanner accuracy</em> across 19 benchmark fixtures. They are not findings from your project. Your project findings only appear after you run an active scan on the <strong>Scan</strong> tab. If no project has been uploaded, there are zero project findings and no fake project statistics.
+                </p>
+              </div>
+            </section>
+
+            <div class="guide-divider"></div>
+
+            <!-- Section 2: What Does Loosewire Look For -->
+            <section class="guide-section" id="section-security-rules">
+              <div class="guide-section-num">02</div>
+              <div class="guide-section-content">
+                <h2 class="guide-section-title">What Does Loosewire Look For?</h2>
+                <p class="guide-p">
+                  Modern checkout architectures split responsibilities between untrusted clients (browsers and mobile apps) and trusted server backends. Loosewire inspects code across four critical security checks:
+                </p>
+
+                <h3 class="guide-sub-title">1. Signature Verification</h3>
+                <p class="guide-p">
+                  When a customer completes payment at a gateway modal, the gateway returns a cryptographic signature (an HMAC hash combining order ID and payment ID, signed with the merchant's secret key). The merchant backend must independently recalculate and verify this HMAC signature before trusting the payment.
+                </p>
+                <p class="guide-p">
+                  <strong>The Risk:</strong> If the server merely accepts a <code>payment_id</code> from the client without verifying the HMAC signature, an adversary can send synthetic HTTP requests with fabricated IDs to mark orders as paid without executing a real transaction.
+                </p>
+
+                <!-- Visual Flow -->
+                <div class="guide-flow-card">
+                  <div class="guide-flow-row insecure">
+                    <div class="flow-tag tag-bad">INSECURE FLOW</div>
+                    <div class="flow-steps monospace">
+                      <span>Customer</span>
+                      <span class="flow-arr">→</span>
+                      <span>Browser</span>
+                      <span class="flow-arr">→</span>
+                      <span class="flow-bad">"Payment OK" (Unverified ID)</span>
+                      <span class="flow-arr">→</span>
+                      <span>Server fulfills order</span>
+                    </div>
+                  </div>
+                  <div class="guide-flow-row secure">
+                    <div class="flow-tag tag-good">SECURE FLOW</div>
+                    <div class="flow-steps monospace">
+                      <span>Customer</span>
+                      <span class="flow-arr">→</span>
+                      <span>Browser</span>
+                      <span class="flow-arr">→</span>
+                      <span>Payment Payload</span>
+                      <span class="flow-arr">→</span>
+                      <span class="flow-good">Server recalculates & validates HMAC</span>
+                      <span class="flow-arr">→</span>
+                      <span>Order fulfilled</span>
+                    </div>
+                  </div>
+                </div>
+
+                <h3 class="guide-sub-title">2. Webhook Verification</h3>
+                <p class="guide-p">
+                  Webhooks are automated server-to-server HTTP notifications sent by payment gateways for asynchronous events (e.g. offline bank transfers clearing, subscription renewals or disputes). Because webhook endpoints are public HTTP URLs, anyone can post payloads to them. The receiving server must check the cryptographic signature in request headers against the webhook secret before processing the event.
+                </p>
+
+                <h3 class="guide-sub-title">3. Amount Validation & Integrity</h3>
+                <p class="guide-p">
+                  Authenticating that a transaction occurred is not the same as verifying the transaction amount. If a backend fails to check that the captured payment amount matches the authoritative database price for that order, an attacker can modify client-side checkout parameters to pay $1 for an item priced at $500.
+                </p>
+
+                <!-- Visual Callout Box -->
+                <div class="guide-example-card">
+                  <div class="example-line">
+                    <span class="example-label">Authoritative Database Price:</span>
+                    <span class="example-val monospace">$500.00</span>
+                  </div>
+                  <div class="example-line">
+                    <span class="example-label">Client Manipulated Payment:</span>
+                    <span class="example-val monospace warning">$1.00</span>
+                  </div>
+                  <div class="example-divider"></div>
+                  <div class="example-line">
+                    <span class="example-label">Integrity Validation Rule:</span>
+                    <span class="example-val monospace status-fail">Price $500.00 does not match paid $1.00 → REJECT &amp; ALERT</span>
+                  </div>
+                </div>
+
+                <h3 class="guide-sub-title">4. Secret Exposure</h3>
+                <p class="guide-p">
+                  Payment gateways provide <em>Public Keys</em> (safe for frontend widgets) and <em>Private Secrets</em> (for backend server signing, refunds and transfers). Private secret keys must never be hardcoded into frontend scripts, HTML templates or mobile Android APK bytecode, where decompilation easily exposes them.
+                </p>
+
+                <!-- Visual Flow -->
+                <div class="guide-flow-card">
+                  <div class="guide-flow-row insecure">
+                    <div class="flow-tag tag-bad">INSECURE</div>
+                    <div class="flow-steps monospace">
+                      <span>Client Script / APK</span>
+                      <span class="flow-arr">→</span>
+                      <span class="flow-bad">[ Contains Private Secret Key ]</span>
+                      <span class="flow-arr">→</span>
+                      <span>Decompilation extracts credentials</span>
+                    </div>
+                  </div>
+                  <div class="guide-flow-row secure">
+                    <div class="flow-tag tag-good">SECURE</div>
+                    <div class="flow-steps monospace">
+                      <span>Client (Public Key only)</span>
+                      <span class="flow-arr">→</span>
+                      <span>Secure Backend</span>
+                      <span class="flow-arr">→</span>
+                      <span class="flow-good">[ Private Secret stored in Vault / ENV ]</span>
+                      <span class="flow-arr">→</span>
+                      <span>Gateway API</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div class="guide-divider"></div>
+
+            <!-- Section 3: Understanding Findings -->
+            <section class="guide-section" id="section-understanding-finding">
+              <div class="guide-section-num">03</div>
+              <div class="guide-section-content">
+                <h2 class="guide-section-title">Understanding a Finding</h2>
+                <p class="guide-p">
+                  When Loosewire analyzes your codebase, each identified security issue is presented with six standardized fields in the Findings workspace:
+                </p>
+
+                <div class="guide-fields-list">
+                  <div class="guide-field-row">
+                    <span class="guide-field-name monospace">Severity</span>
+                    <span class="guide-field-desc">How critical the potential vulnerability is (Critical, High, Medium, Low) based on exploitability and impact.</span>
+                  </div>
+                  <div class="guide-field-row">
+                    <span class="guide-field-name monospace">Confidence</span>
+                    <span class="guide-field-desc">The scanner's certainty (High, Medium, Low) that the detected code pattern constitutes a genuine defect.</span>
+                  </div>
+                  <div class="guide-field-row">
+                    <span class="guide-field-name monospace">Rule</span>
+                    <span class="guide-field-desc">The specific detection rule and check identifier that was triggered.</span>
+                  </div>
+                  <div class="guide-field-row">
+                    <span class="guide-field-name monospace">Location</span>
+                    <span class="guide-field-desc">The exact file path and line number where the issue was detected in your codebase.</span>
+                  </div>
+                  <div class="guide-field-row">
+                    <span class="guide-field-name monospace">Description</span>
+                    <span class="guide-field-desc">A clear explanation of why the detected code structure is insecure.</span>
+                  </div>
+                  <div class="guide-field-row">
+                    <span class="guide-field-name monospace">Fix</span>
+                    <span class="guide-field-desc">Actionable code modifications and remediation steps to resolve the finding.</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div class="guide-divider"></div>
+
+            <!-- Section 4: Full Forms & Evaluation Metrics (Precision, Recall, F1, TP, FP, FN) -->
+            <section class="guide-section" id="section-eval-metrics">
+              <div class="guide-section-num">04</div>
+              <div class="guide-section-content">
+                <h2 class="guide-section-title">Evaluation Metrics & Full Forms</h2>
+                <p class="guide-p">
+                  To evaluate how reliably Loosewire performs, we use standard classification metrics. You do not need any background in statistics or machine learning to understand them:
+                </p>
+
+                <h3 class="guide-sub-title">Core Classification Terms</h3>
+                <div class="guide-fields-list">
+                  <div class="guide-field-row">
+                    <span class="guide-field-name monospace">TP</span>
+                    <div class="guide-field-desc">
+                      <strong>True Positive</strong>: Loosewire correctly identifies a real vulnerability that actually exists in the code.
+                    </div>
+                  </div>
+                  <div class="guide-field-row">
+                    <span class="guide-field-name monospace">FP</span>
+                    <div class="guide-field-desc">
+                      <strong>False Positive</strong>: Loosewire reports a vulnerability that is not actually present. This is a <em>false alarm</em>. While no security hole exists, too many false alarms cause alert fatigue and waste engineering time investigating non-issues.
+                    </div>
+                  </div>
+                  <div class="guide-field-row">
+                    <span class="guide-field-name monospace">FN</span>
+                    <div class="guide-field-desc">
+                      <strong>False Negative</strong>: A real vulnerability exists in the code but Loosewire fails to detect it. This is a <em>missed issue</em>. False negatives are dangerous because an undetected flaw can reach production.
+                    </div>
+                  </div>
+                  <div class="guide-field-row">
+                    <span class="guide-field-name monospace">F1</span>
+                    <div class="guide-field-desc">
+                      <strong>F1 Score / F-measure</strong>: A combined measure that balances Precision and Recall into a single overall performance score using their harmonic mean. The "1" refers to the standard equal-weight version of the F-measure (giving equal importance to precision and recall).
+                    </div>
+                  </div>
+                </div>
+
+                <h3 class="guide-sub-title" style="margin-top: var(--sp-6);">Precision, Recall, and F1 Explained</h3>
+
+                <div class="guide-metrics-expl-grid">
+                  <div class="guide-metric-card">
+                    <div class="metric-expl-title">Precision</div>
+                    <div class="metric-expl-formula monospace">Formula: TP / (TP + FP)</div>
+                    <p class="guide-p">
+                      <strong>Precision asks:</strong> <em>"When Loosewire says it found something, how often is it actually correct?"</em>
+                    </p>
+                    <div class="metric-expl-example">
+                      <strong>Simple Example:</strong> If Loosewire reports <strong>10 findings</strong> and <strong>9 are real vulnerabilities</strong> while <strong>1 is a false alarm</strong>, Precision is <strong>90%</strong> (9 / 10).<br><br>
+                      <strong>Why it matters:</strong> High precision means fewer false alarms and low alert noise for developers.
+                    </div>
+                  </div>
+
+                  <div class="guide-metric-card">
+                    <div class="metric-expl-title">Recall</div>
+                    <div class="metric-expl-formula monospace">Formula: TP / (TP + FN)</div>
+                    <p class="guide-p">
+                      <strong>Recall asks:</strong> <em>"Of all the real vulnerabilities that existed, how many did Loosewire actually find?"</em>
+                    </p>
+                    <div class="metric-expl-example">
+                      <strong>Simple Example:</strong> If there are <strong>10 real vulnerabilities</strong> across the codebase and Loosewire catches all <strong>10</strong>, Recall is <strong>100%</strong> (10 / 10, with 0 missed).<br><br>
+                      <strong>Why it matters:</strong> High recall means comprehensive security coverage with fewer missed vulnerabilities.
+                    </div>
+                  </div>
+
+                  <div class="guide-metric-card">
+                    <div class="metric-expl-title">F1 Score</div>
+                    <div class="metric-expl-formula monospace">Formula: 2 × (P × R) / (P + R)</div>
+                    <p class="guide-p">
+                      <strong>F1 Score balances both:</strong> <em>Combines Precision and Recall into one overall quality score.</em>
+                    </p>
+                    <div class="metric-expl-example">
+                      <strong>Why it matters:</strong> A scanner could flag every line of code to achieve 100% recall but produce overwhelming false alarms (poor precision). Or it could only flag 1 obvious flaw for 100% precision, while missing 9 others (poor recall). F1 balances both into one score.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div class="guide-divider"></div>
+
+            <!-- Section 5: Held-Out Evaluation -->
+            <section class="guide-section" id="section-held-out">
+              <div class="guide-section-num">05</div>
+              <div class="guide-section-content">
+                <h2 class="guide-section-title">The Held-Out Evaluation (19 Fixtures)</h2>
+                <p class="guide-p">
+                  On the <strong>Metrics</strong> tab, you see published benchmark scores: <strong>88.9% Precision</strong>, <strong>100% Recall</strong> and <strong>94.1% F1</strong>.
+                </p>
+                <p class="guide-p">
+                  <strong>What does this mean?</strong> These are <strong>NOT metrics from your uploaded project</strong>. They measure <strong>Loosewire's scanner performance</strong>. They were calculated by testing Loosewire against an isolated test suite of <strong>19 held-out evaluation fixtures</strong> (containing both clean and deliberately vulnerable checkout implementations) where expected findings were strictly partitioned during detector rule authoring.
+                </p>
+
+                <h3 class="guide-sub-title">Evaluation Results Breakdown:</h3>
+                <div class="guide-fields-list">
+                  <div class="guide-field-row">
+                    <span class="guide-field-name monospace">8 TP</span>
+                    <span class="guide-field-desc">Loosewire correctly detected 8 real vulnerabilities across the test suite.</span>
+                  </div>
+                  <div class="guide-field-row">
+                    <span class="guide-field-name monospace">1 FP</span>
+                    <span class="guide-field-desc">Loosewire produced 1 false alarm candidate during rule evaluation.</span>
+                  </div>
+                  <div class="guide-field-row">
+                    <span class="guide-field-name monospace">0 FN</span>
+                    <span class="guide-field-desc">Loosewire missed 0 real vulnerabilities across all test fixtures (100% recall).</span>
+                  </div>
+                </div>
+
+                <div class="guide-disclaimer-callout">
+                  <strong>Key Distinction:</strong><br>
+                  • <strong>Scanner Evaluation:</strong> Measures how well Loosewire itself detects known issues across benchmark fixtures.<br>
+                  • <strong>Current Scan:</strong> Measures what Loosewire found in your specific uploaded project.<br>
+                  These are two completely separate things.
+                </div>
+              </div>
+            </section>
+
+            <div class="guide-divider"></div>
+
+            <!-- Section 6: Estimated Value Model -->
+            <section class="guide-section" id="section-value-model">
+              <div class="guide-section-num">06</div>
+              <div class="guide-section-content">
+                <h2 class="guide-section-title">The Estimated Value Model ($3,975)</h2>
+                <p class="guide-p">
+                  The Metrics tab displays an <strong>Estimated Value Saved ($3,975)</strong> along with assumptions of <strong>$25 / false positive</strong> and <strong>$500 / false negative</strong>.
+                </p>
+
+                <h3 class="guide-sub-title">What is it?</h3>
+                <p class="guide-p">
+                  It is an <strong>assumption-based cost model</strong> used to illustrate the potential financial value of catching security defects early versus manual triage overhead.
+                </p>
+
+                <div class="guide-disclaimer-callout">
+                  <strong>$3,975 is an illustrative, assumption-based estimate. It is not measured financial savings and is not audited telemetry.</strong>
+                </div>
+
+                <h3 class="guide-sub-title">The Model Assumptions</h3>
+                <div class="guide-assumptions-grid">
+                  <div class="guide-assumption-card">
+                    <div class="assumption-title monospace">$25 / False Positive (FP)</div>
+                    <p class="guide-p">
+                      The assumed engineering/security triage cost required for a developer or security engineer to investigate, review and dismiss a finding that turns out not to be a real vulnerability (false alarm).
+                    </p>
+                  </div>
+                  <div class="guide-assumption-card">
+                    <div class="assumption-title monospace">$500 / False Negative (FN)</div>
+                    <p class="guide-p">
+                      The assumed downstream exposure and remediation cost associated with a real payment vulnerability being missed and reaching production (fraud loss, unauthorized order fulfillment, emergency patching).
+                    </p>
+                  </div>
+                </div>
+
+                <h3 class="guide-sub-title" style="margin-top: var(--sp-4);">How $3,975 is Calculated:</h3>
+                <p class="guide-p">
+                  Using the evaluation results from the 19 benchmark fixtures (8 TP, 1 FP, 0 FN):
+                </p>
+                <ul class="guide-calc-list monospace">
+                  <li>• 8 True Positives detected × $500 avoided exposure = +$4,000</li>
+                  <li>• 1 False Positive raised × $25 triage overhead = -$25</li>
+                  <li>• 0 False Negatives missed × $500 exposure = -$0</li>
+                  <li>• Net Modeled Value = $4,000 - $25 = <strong>$3,975</strong></li>
+                </ul>
+
+                <p class="guide-p" style="margin-top: var(--sp-3);">
+                  The displayed <strong>$3,975</strong> represents the difference between the modeled cost of Loosewire's evaluation outcome and a hypothetical zero-coverage baseline where no automated analysis is run.
+                </p>
+
+                <h3 class="guide-sub-title">Why Does This Model Exist?</h3>
+                <p class="guide-p">
+                  The purpose of the Estimated Value Model is to translate abstract scanner performance statistics (precision and recall) into a simple, business-oriented estimate. It helps answer: <em>"Why does improving detection accuracy matter?"</em> It clearly illustrates the economic trade-off between the substantial benefits of catching vulnerabilities and the minor operational friction of reviewing false alarms.
+                </p>
+              </div>
+            </section>
+
+            <div class="guide-divider"></div>
+
+            <!-- Section 7: What Loosewire Does Not Claim -->
+            <section class="guide-section" id="section-no-claims">
+              <div class="guide-section-num">07</div>
+              <div class="guide-section-content">
+                <h2 class="guide-section-title">What Loosewire Does Not Claim</h2>
+                <p class="guide-p">
+                  Loosewire is an automated static analysis tool. A clean scan does not constitute a formal guarantee that an application is 100% secure. Comprehensive payment security requires a defense-in-depth posture including:
+                </p>
+                <div class="guide-pillars-grid">
+                  <div class="guide-pillar-item">• Thorough manual code review</div>
+                  <div class="guide-pillar-item">• End-to-end sandbox payment testing</div>
+                  <div class="guide-pillar-item">• Strict server-side authorization</div>
+                  <div class="guide-pillar-item">• Secure secret management vaults</div>
+                  <div class="guide-pillar-item">• Web application firewall (WAF)</div>
+                  <div class="guide-pillar-item">• Continuous ledger anomaly monitoring</div>
+                </div>
+              </div>
+            </section>
+
+            <div class="guide-divider"></div>
+
+            <!-- Section 8: Safe & Authorized Use -->
+            <section class="guide-section" id="section-safe-use">
+              <div class="guide-section-num">08</div>
+              <div class="guide-section-content">
+                <h2 class="guide-section-title">Safe & Authorized Use</h2>
+                <p class="guide-p">
+                  Loosewire is intended for scanning source code and application packages that you own or have explicit authorization to audit.
+                </p>
+                <p class="guide-p">
+                  All analysis is performed entirely locally on your machine using temporary memory directories. No source code, credentials, or findings are transmitted to external servers or retained after analysis completes.
+                </p>
+              </div>
+            </section>
+
+          </article>
+        </section>
+
+      </main>
+    </div>
   </div>
-</div>
-<script src="app.js"></script>
+  <script src="app.js"></script>
 </body>
+
 </html>
