@@ -53,6 +53,22 @@ APK scanning needs [jadx](https://github.com/skylot/jadx) installed and on
 `PATH`. If it isn't available, the scan endpoint returns a clear error for
 `.apk` uploads instead of failing silently. `.zip` uploads are unaffected.
 
+## Interface
+
+The app is one page with four views, reachable from the sidebar: Scan,
+Findings, Metrics, and Product Handbook.
+
+Scan is where you upload a file, with a short readout of what stage the
+scan is on while it runs. Findings is a split view: a list of results on
+the left, the full detail of whichever one you select on the right,
+including the location, why it matters, and the suggested fix. Metrics
+shows the numbers described below. Product Handbook is a short in-app
+guide explaining the four checks, how to read a finding, and how the
+evaluation numbers are calculated, written for someone opening the tool
+with no prior context.
+
+The interface is dark only. There is no light mode and no theme toggle.
+
 ## Architecture
 
 A scan is a straight line from upload to report, with nothing kept
