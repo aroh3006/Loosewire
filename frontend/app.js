@@ -218,6 +218,7 @@
   const findingsEmpty = document.getElementById("findings-empty");
   const findingsBodyWrap = document.getElementById("findings-body");
   const findingsSeverityDist = document.getElementById("findings-severity-dist");
+  const findingsSessionSummary = document.getElementById("findings-session-summary");
   const findingList = document.getElementById("finding-list");
   const findingDetailContent = document.getElementById("finding-detail-content");
   const investigation = document.getElementById("investigation");
@@ -253,6 +254,8 @@
         '<p>All detection rules passed without finding security issues across ' + report.files_scanned + ' analyzed file(s).</p>' +
         '</div>';
       findingsBodyWrap.style.display = "none";
+      findingsSeverityDist.innerHTML = "";
+      findingsSessionSummary.innerHTML = "";
       return;
     }
 
@@ -265,18 +268,13 @@
     }
     findingsCount.innerHTML = metaHtml;
 
-    const counts = { critical: 0, high: 0, medium: 0, low: 0 };
-    for (const f of report.findings) {
-      if (f.severity in counts) counts[f.severity]++;
-    }
-    findingsSeverityDist.innerHTML = severityDistHtml(counts);
-
     findingsEmpty.style.display = "none";
     findingsBodyWrap.style.display = "block";
     investigation.classList.remove("show-detail");
 
     renderFindingList();
     renderFindingDetail();
+    renderSessionSummary();
   }
 
   function renderFindingList() {
@@ -370,6 +368,28 @@
 
   findingBack.addEventListener("click", () => investigation.classList.remove("show-detail"));
 
+  // Recomputes the severity grid and the small working-view line below it,
+  // based on which findings are currently marked not applicable. This never
+  // touches the backend and never affects the numbers on the Metrics tab.
+  function renderSessionSummary() {
+    const total = currentFindings.length;
+    const dismissedCount = dismissedIndices.size;
+    const activeCounts = computeActiveSeverityCounts(currentFindings, dismissedIndices);
+    findingsSeverityDist.innerHTML = severityDistHtml(activeCounts);
+
+    const activeTotal = total - dismissedCount;
+    let html = '<div class="findings-meta-bar">' +
+      '<span class="meta-item">' + activeTotal + ' of ' + total + ' findings shown</span>';
+    if (dismissedCount > 0) {
+      html += '<span class="meta-separator">/</span>' +
+        '<span class="meta-item">' + dismissedCount + ' marked not applicable</span>';
+    }
+    html += '</div>' +
+      '<div class="assumption-disclaimer">This is your working view for this scan. It does not change the evaluation numbers on the Metrics tab.</div>';
+
+    findingsSessionSummary.innerHTML = html;
+  }
+
   document.addEventListener("click", (e) => {
     const naBtn = e.target.closest("[data-toggle-na]");
     if (!naBtn) return;
@@ -380,6 +400,7 @@
     }
     renderFindingList();
     renderFindingDetail();
+    renderSessionSummary();
   });
 
   /* ---------- metrics ---------- */
