@@ -88,9 +88,12 @@ node tests/frontend/test_severity_summary.js
 
 APK scanning needs [jadx](https://github.com/skylot/jadx) installed and on
 `PATH`. If it isn't available, the scan endpoint returns a clear error for
-`.apk` uploads instead of failing silently. Zip uploads are unaffected. The
-hosted instance does not have jadx installed. APK scanning therefore only
-works when you run Loosewire yourself.
+`.apk` uploads instead of failing silently. Zip uploads are unaffected. When
+you run Loosewire yourself you need to install jadx to scan an APK.
+
+APK scanning also works on the hosted deployment. That instance runs as a
+Docker container with a Java runtime and jadx already installed. You can
+upload an APK to the live site without setting anything up yourself.
 
 ## Interface
 
