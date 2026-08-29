@@ -22,9 +22,13 @@ written correctly and scans clean. The other two contain real mistakes that
 between them cover all four checks. The readme inside that folder explains
 what each zip demonstrates.
 
-The hosted app runs on a free instance that sleeps when nobody is using it.
-The first request after a quiet spell can take up to a minute while the
-instance wakes up. Requests after that are quick.
+The hosted app runs on a free instance that would normally sleep when nobody
+is using it. A scheduled health check pings it regularly to keep it awake. In
+normal circumstances a visitor should not run into a wake-up delay. That
+depends on the scheduled check staying configured correctly. It also depends
+on how the free tier behaves at the time. If the instance has gone to sleep
+anyway, the first request can take up to a minute. Requests after that are
+quick.
 
 ## What it checks for
 
