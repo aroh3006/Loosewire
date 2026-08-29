@@ -17,11 +17,13 @@ open it and scan a project straight away. There is nothing to install. There
 is no account to create.
 
 If you want something to upload without digging out a project of your own,
-the `examples` folder in this repo holds four ready-made samples. Three are
+the `examples` folder in this repo holds five ready-made samples. Three are
 zipped source projects. One is written correctly and scans clean. The other
-two contain real mistakes that between them cover all four checks. The fourth
-sample is a real Android APK, there so you can try the APK path as well as the
-zip path. The readme inside that folder explains what each one demonstrates.
+two contain real mistakes that between them cover all four checks. The last
+two samples are Android APKs, there so you can try the APK path as well as the
+zip path. One of those scans clean. The other carries a planted key that the
+scanner picks up. The readme inside that folder explains what each one
+demonstrates.
 
 The hosted app runs on a free instance that would normally sleep when nobody
 is using it. A scheduled health check pings it regularly to keep it awake. In

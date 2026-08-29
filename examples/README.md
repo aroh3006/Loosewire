@@ -3,7 +3,7 @@
 These are small sample projects you can upload to Loosewire to see what a scan
 looks like without writing any code yourself. Each one is ready to drop
 straight into the upload box at https://loosewire.onrender.com. Three of them
-are zipped source projects. One is a real Android APK for trying the APK path.
+are zipped source projects. Two are Android APKs for trying the APK path.
 
 These are separate from the `fixtures` folder at the root of the repo. Fixtures
 are used by the automated test suite and the evaluation numbers. These examples
@@ -73,6 +73,37 @@ purely as a known-good APK to scan.
 The Apache License 2.0 allows redistribution. The file is bundled exactly as
 downloaded from F-Droid, with no changes of any kind.
 
+## exposed-key-demo.apk
+
+The APK counterpart to the broken zips. This one triggers a real finding.
+
+Be clear about what this file is. It is not a separate app. It is a repackaged
+copy of the same F-Droid Privileged Extension described above, with one small
+file added on purpose. Nothing else about the app was touched. The added file
+is `assets/demo/checkout-config.js`, a short piece of throwaway JavaScript
+holding a hardcoded key:
+
+    var gatewayApiSecretKey = "gwk_demo_4TnQ8xLm2VbW7ZcR5HdY9KsP";
+
+That value is invented for this example. It is not a credential for anything.
+It does not open any account and it is not tied to any real service.
+
+Scanning this returns one critical finding from the exposed secret key rule.
+The rule treats a key sitting in a file that ships inside the app as worse
+than one in backend code, because anyone can pull an APK apart and read it.
+That is the whole point of the example. The key is invisible in the packaged
+app. It falls straight out once the file is decompiled.
+
+The repackaging was done with apktool. The result was signed with jarsigner
+using a throwaway self-signed key made for this purpose. It is a valid signed
+APK. It decompiles cleanly. The signing key is a local demo key with no
+meaning outside these examples.
+
+This modified copy is redistributed under the same Apache License 2.0 as the
+original. The license permits changes as long as they are stated. This section
+is that statement. Do not treat this file as the real F-Droid app. Use the
+unmodified `fdroid-privileged-extension.apk` above if that is what you want.
+
 ## Trying them out
 
 Download the file you want. Open the live app and drop it into the upload box
@@ -83,5 +114,6 @@ An APK scan takes longer than a zip scan. The server has to decompile the app
 before it can read any code. Around half a minute is normal.
 
 Between the three zips these examples cover all four checks the tool runs. You
-can see every rule fire without needing a project of your own. The APK covers
-the other half of the tool, the path that handles compiled Android apps.
+can see every rule fire without needing a project of your own. The two APKs
+cover the other half of the tool, the path that handles compiled Android apps.
+One of them scans clean. The other one does not.
