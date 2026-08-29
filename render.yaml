@@ -7,10 +7,9 @@ projects:
         services:
           - type: web
             name: Loosewire
-            runtime: python
+            runtime: docker
             repo: https://github.com/aroh3006/Loosewire
             plan: free
             region: singapore
-            buildCommand: pip install -r requirements.txt
-            startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+            dockerfilePath: ./Dockerfile
             autoDeployTrigger: commit
