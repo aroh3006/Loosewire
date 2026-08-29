@@ -1,8 +1,16 @@
-services:
-  - type: web
-    name: loosewire
-    env: python
-    plan: free
-    branch: main
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+# Exported from Render on 2026-08-29T07:33:01Z
+version: "1"
+projects:
+  - name: My project
+    environments:
+      - name: Production
+        services:
+          - type: web
+            name: Loosewire
+            runtime: python
+            repo: https://github.com/aroh3006/Loosewire
+            plan: free
+            region: singapore
+            buildCommand: pip install -r requirements.txt
+            startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+            autoDeployTrigger: commit
