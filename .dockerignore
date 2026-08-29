@@ -1,0 +1,39 @@
+# Virtual environments and local Python cruft
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+
+# Git metadata
+.git/
+.gitignore
+
+# Node dependencies, never needed in the image
+node_modules/
+
+# Fixtures used only while building the rules. fixtures/heldout is kept on
+# purpose, since the metrics endpoint scans it live on every request.
+fixtures/dev/
+
+# Test suite is not run from the image
+tests/
+
+# Sample projects for people trying the hosted app. They are downloaded from
+# the repo, not served by it.
+examples/
+
+# Local scan scratch directories
+/tmp_scan_*/
+
+# Editor and OS noise
+.DS_Store
+*.log
+notes/
+
+# Deploy and build config, not read by the running app
+Dockerfile
+.dockerignore
+render.yaml
